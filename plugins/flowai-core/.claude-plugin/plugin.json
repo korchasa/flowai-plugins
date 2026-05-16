@@ -6,12 +6,5 @@
   },
   "repository": "https://github.com/korchasa/flowai",
   "homepage": "https://github.com/korchasa/flowai#claude-code-plugin-marketplace",
-  "keywords": [
-    "ai",
-    "workflow",
-    "framework",
-    "assistflow"
-  ],
-  "category": "development-workflows",
   "license": "MIT"
 }

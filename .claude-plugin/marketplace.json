@@ -8,7 +8,14 @@
     {
       "name": "flowai-core",
       "source": "./plugins/flowai-core",
-      "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)"
+      "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
+      "keywords": [
+        "ai",
+        "workflow",
+        "framework",
+        "assistflow"
+      ],
+      "category": "development-workflows"
     }
   ]
 }
