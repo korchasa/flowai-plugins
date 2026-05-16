@@ -114,7 +114,7 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
      - User corrected the agent's approach or output.
      - Workarounds or non-obvious solutions were applied.
    - If **any** of these signals are detected, suggest:
-     "This session had [errors/retries/corrections/workarounds]. Consider running `/flowai-reflect` to capture improvements for project instructions."
+     "This session had [errors/retries/corrections/workarounds]. Consider running `/flowai-core:reflect` to capture improvements for project instructions."
    - If none detected, skip silently.
 </step_by_step>
 
@@ -128,5 +128,5 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
 - [ ] Conventional Commits format used.
 - [ ] Task lifecycle: every staged new-shape task (`documents/tasks/<YYYY>/<MM>/*.md` with `date:` frontmatter) had its `status:` auto-derived from `## Definition of Done` checkbox count and rewritten if it differed (`to do | in progress | done`). Never downgrades `done`. Warn-only on parse errors.
 - [ ] Task file cleanup: legacy flat-path task files (no `date:` frontmatter) — completed deleted, partial confirmed with user. New-shape tasks NEVER deleted (persistent canonical records).
-- [ ] Session complexity check performed; `/flowai-reflect` suggested if signals detected.
+- [ ] Session complexity check performed; `/flowai-core:reflect` suggested if signals detected.
 </verification>

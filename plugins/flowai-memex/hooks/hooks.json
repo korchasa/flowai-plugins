@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "deno run -A ${CLAUDE_PLUGIN_ROOT}/hooks/flowai-memex-status/run.ts",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

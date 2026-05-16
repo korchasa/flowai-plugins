@@ -51,7 +51,7 @@ This skill is the inverse of `flowai-init`: `flowai-init` creates AGENTS.md from
 
 2. **Read the template and the project artifact.**
    - Read the template file content.
-   - Read `<cwd>/AGENTS.md`. If it does not exist, tell the user to run `/flowai-init` instead and stop — this skill only re-adapts an existing artifact.
+   - Read `<cwd>/AGENTS.md`. If it does not exist, tell the user to run `/flowai-core:init` instead and stop — this skill only re-adapts an existing artifact.
 
 3. **Compute the diff.**
    - Run `git diff --no-index --exit-code <(echo "$template") <(echo "$artifact")` OR in-process string diff via `diff` tool.

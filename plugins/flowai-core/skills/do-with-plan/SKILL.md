@@ -399,7 +399,7 @@ After completing the review report above:
      - Workarounds or non-obvious solutions were applied.
    - Also check the **user's invocation message** for explicit complexity descriptors: phrases like "rough session", "had to retry", "wrong approach", "failed", "had to correct you". These count as direct signals.
    - If **any** of these signals are detected:
-     a. Announce briefly which signals fired (one line, e.g., "Detected retries and user correction — running /flowai-reflect").
+     a. Announce briefly which signals fired (one line, e.g., "Detected retries and user correction — running /flowai-core:reflect").
      b. **Pre-command signal check**: if the signals appear only in the invocation message (i.e., the problematic interactions predated this command and are not visible in the conversation history), output: "You mentioned a rough session — briefly describe what went wrong and what you corrected. This will be included as reflect context." Use the user's answer as additional context when invoking reflect.
      c. Invoke the `flowai-reflect` skill directly (via the Skill tool, native slash-command execution, or inline execution of its `SKILL.md` instructions — whichever the host IDE supports).
      d. Do NOT ask the user for confirmation before invoking; proceed autonomously (the context question in step b is not a confirmation request — it gathers missing information).
@@ -433,7 +433,7 @@ Output a combined summary:
 [ ] Changes grouped by logical purpose (default 1 commit).
 [ ] Commits used Conventional Commits format.
 [ ] Task file cleanup: completed task files deleted, partial task files confirmed with user.
-[ ] Session complexity check performed; `/flowai-reflect` auto-invoked if signals detected.
+[ ] Session complexity check performed; `/flowai-core:reflect` auto-invoked if signals detected.
 [ ] Post-reflect cleanup commit created when reflect left uncommitted edits to project instructions; otherwise skipped.
 [ ] Plan / Implement / Review / Commit results all reported to user.
 </verification>

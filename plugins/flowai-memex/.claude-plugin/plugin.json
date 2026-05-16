@@ -1,0 +1,11 @@
+{
+  "name": "flowai-memex",
+  "description": "Memex — long-term knowledge bank for AI agents. Skills that ingest sources, answer questions with citations, and audit the bank for orphans, dead links, and contradictions.",
+  "version": "0.12.16",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "homepage": "https://github.com/korchasa/flowai#claude-code-plugin-marketplace",
+  "license": "MIT"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "flowai-devtools",
+  "description": "Skill and agent authoring tools (engineer-skill, engineer-command, benchmarks, etc.)",
+  "version": "0.12.16",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "homepage": "https://github.com/korchasa/flowai#claude-code-plugin-marketplace",
+  "license": "MIT"
+}

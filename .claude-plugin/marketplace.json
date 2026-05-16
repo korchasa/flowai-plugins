@@ -9,6 +9,72 @@
       "name": "flowai-core",
       "source": "./plugins/flowai-core",
       "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
+      "version": "0.12.16",
+      "keywords": [
+        "ai",
+        "workflow",
+        "framework",
+        "assistflow"
+      ],
+      "category": "development-workflows"
+    },
+    {
+      "name": "flowai-deno",
+      "source": "./plugins/flowai-deno",
+      "description": "Deno-specific skills (CLI, deploy, configure commands)",
+      "version": "0.12.16",
+      "keywords": [
+        "ai",
+        "workflow",
+        "framework",
+        "assistflow"
+      ],
+      "category": "development-workflows"
+    },
+    {
+      "name": "flowai-devtools",
+      "source": "./plugins/flowai-devtools",
+      "description": "Skill and agent authoring tools (engineer-skill, engineer-command, benchmarks, etc.)",
+      "version": "0.12.16",
+      "keywords": [
+        "ai",
+        "workflow",
+        "framework",
+        "assistflow"
+      ],
+      "category": "development-workflows"
+    },
+    {
+      "name": "flowai-engineering",
+      "source": "./plugins/flowai-engineering",
+      "description": "Procedural engineering knowledge (deep-research, fix-tests, draw-diagrams, write-prd, etc.)",
+      "version": "0.12.16",
+      "keywords": [
+        "ai",
+        "workflow",
+        "framework",
+        "assistflow"
+      ],
+      "category": "development-workflows"
+    },
+    {
+      "name": "flowai-memex",
+      "source": "./plugins/flowai-memex",
+      "description": "Memex — long-term knowledge bank for AI agents. Skills that ingest sources, answer questions with citations, and audit the bank for orphans, dead links, and contradictions.",
+      "version": "0.12.16",
+      "keywords": [
+        "ai",
+        "workflow",
+        "framework",
+        "assistflow"
+      ],
+      "category": "development-workflows"
+    },
+    {
+      "name": "flowai-typescript",
+      "source": "./plugins/flowai-typescript",
+      "description": "TypeScript-specific setup skills (code style, strict mode)",
+      "version": "0.12.16",
       "keywords": [
         "ai",
         "workflow",
