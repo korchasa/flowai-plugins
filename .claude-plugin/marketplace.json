@@ -1,0 +1,17 @@
+{
+  "name": "flowai-plugins",
+  "owner": {
+    "name": "korchasa"
+  },
+  "description": "AssistFlow framework — Claude Code plugin marketplace",
+  "metadata": {
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "flowai-core",
+      "source": "./plugins/flowai-core",
+      "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)"
+    }
+  ]
+}
