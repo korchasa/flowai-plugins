@@ -4,9 +4,6 @@
     "name": "korchasa"
   },
   "description": "AssistFlow framework — Claude Code plugin marketplace",
-  "metadata": {
-    "pluginRoot": "./plugins"
-  },
   "plugins": [
     {
       "name": "flowai-core",
