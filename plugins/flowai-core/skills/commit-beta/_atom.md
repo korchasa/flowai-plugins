@@ -1,10 +1,12 @@
 ---
 name: flowai-commit-beta
-description: 'Streamlined commit workflow — fewer tool calls, targeted doc sync'
-disable-model-invocation: true
+description: Streamlined commit workflow — fewer tool calls, targeted doc sync
+_params:
+  DIFF_SOURCE:
+    choices: [FRESH_READ, REUSE_PRIOR_PHASE]
+    default: FRESH_READ
+    description: How step 1 acquires the diff. FRESH_READ collects git state from scratch (standalone usage); REUSE_PRIOR_PHASE assumes a prior phase already ran `git diff` and only verifies the tree did not change (composite usage).
 ---
-
-<!-- GENERATED FROM framework/core/commands/flowai-commit-beta/_atom.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Commit Workflow
 
@@ -55,10 +57,7 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
 
 <step_by_step>
 
-1. **Gather Changes**
-   - Collect all git state in a single command:
-     `git status -s && echo '---DIFF---' && git diff && echo '---CACHED---' && git diff --cached && echo '---LOG---' && git log --oneline -5`
-   - If working directory is clean (no changes at all), report "Nothing to commit" and STOP.
+{{DIFF_SOURCE}}
 2. **Documentation Sync** _(mandatory — do NOT skip)_
    - **Determine scope**: look at the file paths from step 1. Classify the change:
      - **Infra-only**: ALL changed files are tests (`*_test.*`, `*.test.*`), CI (`.github/`), acceptance tests (`acceptance-tests/`), formatting, or dev-environment (`.devcontainer/`). → Skip doc sync. Output: `Documentation sync: skipped — infra-only changes (tests/CI/acceptance-tests)`.
@@ -112,7 +111,7 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
      - Workarounds or non-obvious solutions were applied.
    - Also check the **user's invocation message** for explicit complexity descriptors: phrases like "rough session", "had to retry", "wrong approach", "failed", "had to correct you". These count as direct signals.
    - If **any** of these signals are detected:
-     a. Announce briefly which signals fired (one line, e.g., "Detected retries and user correction — running /flowai-core:reflect").
+     a. Announce briefly which signals fired (one line, e.g., "Detected retries and user correction — running /flowai-reflect").
      b. **Pre-command signal check**: if the signals appear only in the invocation message (i.e., the problematic interactions predated this command and are not visible in the conversation history), output: "You mentioned a rough session — briefly describe what went wrong and what you corrected. This will be included as reflect context." Use the user's answer as additional context when invoking reflect.
      c. Invoke the `flowai-reflect` skill directly (via the Skill tool, native slash-command execution, or inline execution of its `SKILL.md` instructions — whichever the host IDE supports).
      d. Do NOT ask the user for confirmation before invoking; proceed autonomously (the context question in step b is not a confirmation request — it gathers missing information).
@@ -133,6 +132,20 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
 - [ ] Commits executed automatically without user prompt.
 - [ ] Conventional Commits format used.
 - [ ] Task file cleanup: completed task files deleted, partial task files confirmed with user.
-- [ ] Session complexity check performed; `/flowai-core:reflect` auto-invoked if signals detected.
+- [ ] Session complexity check performed; `/flowai-reflect` auto-invoked if signals detected.
 - [ ] Post-reflect cleanup commit created when reflect left uncommitted edits to project instructions; otherwise skipped.
 </verification>
+
+<param-branch name="DIFF_SOURCE" value="FRESH_READ">
+1. **Gather Changes**
+   - Collect all git state in a single command:
+     `git status -s && echo '---DIFF---' && git diff && echo '---CACHED---' && git diff --cached && echo '---LOG---' && git log --oneline -5`
+   - If working directory is clean (no changes at all), report "Nothing to commit" and STOP.
+</param-branch>
+
+<param-branch name="DIFF_SOURCE" value="REUSE_PRIOR_PHASE">
+1. **Verify Unchanged State**
+   - The diff and file list are already in context from the prior phase. Do NOT re-read them.
+   - Run only `git status -s` to confirm nothing changed between phases.
+   - If new changes appeared (unexpected), report and STOP.
+</param-branch>

@@ -1,0 +1,28 @@
+{
+  "name": "flowai-devtools",
+  "version": "0.12.17",
+  "description": "Skill and agent authoring tools (engineer-skill, engineer-command, benchmarks, etc.)",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "keywords": [
+    "ai",
+    "workflow",
+    "framework",
+    "flowai"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "flowai devtools",
+    "shortDescription": "Skill and agent authoring tools (engineer-skill, engineer-command, benchmarks, etc.)",
+    "developerName": "korchasa",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ]
+  },
+  "license": "MIT",
+  "hooks": "./hooks/hooks.json"
+}

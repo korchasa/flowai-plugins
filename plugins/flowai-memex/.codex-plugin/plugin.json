@@ -1,0 +1,28 @@
+{
+  "name": "flowai-memex",
+  "version": "0.12.17",
+  "description": "Memex — long-term knowledge bank for AI agents. Skills that ingest sources, answer questions with citations, and audit the bank for orphans, dead links, and contradictions.",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "keywords": [
+    "ai",
+    "workflow",
+    "framework",
+    "flowai"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "flowai memex",
+    "shortDescription": "Memex — long-term knowledge bank for AI agents. Skills that ingest sources, answer questions with citations, and audit the bank for orphans, dead links, and contradictions.",
+    "developerName": "korchasa",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ]
+  },
+  "license": "MIT",
+  "hooks": "./hooks/hooks.json"
+}
