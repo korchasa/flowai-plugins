@@ -9,7 +9,7 @@ argument-hint: task description or issue URL
 effort: high
 ---
 
-<!-- GENERATED FROM framework/core/commands/flowai-plan-exp-permanent-tasks/_atom.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/atoms/plan-exp-permanent-tasks.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Task Planning (committed-tasks variant)
 

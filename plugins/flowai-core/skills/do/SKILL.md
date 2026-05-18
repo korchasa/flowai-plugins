@@ -7,7 +7,7 @@ description: >-
   committed changes, or fixing pre-existing failing tests outside a plan.
 ---
 
-<!-- GENERATED FROM framework/core/skills/flowai-do/_atom.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/atoms/do.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Task: Implement Plan Under TDD
 

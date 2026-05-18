@@ -8,7 +8,7 @@ description: >-
   or on post-merge code review of historical commits.
 ---
 
-<!-- GENERATED FROM framework/core/skills/flowai-review/_atom.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/atoms/review.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Task: Review Changes
 

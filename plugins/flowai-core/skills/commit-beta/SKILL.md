@@ -4,7 +4,7 @@ description: 'Streamlined commit workflow — fewer tool calls, targeted doc syn
 disable-model-invocation: true
 ---
 
-<!-- GENERATED FROM framework/core/commands/flowai-commit-beta/_atom.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/atoms/commit-beta.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Commit Workflow
 

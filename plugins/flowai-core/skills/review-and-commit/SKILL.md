@@ -7,7 +7,7 @@ description: >-
 disable-model-invocation: true
 ---
 
-<!-- GENERATED FROM framework/core/commands/flowai-review-and-commit/_composite.md, framework/core/skills/flowai-review/_atom.md, framework/core/commands/flowai-commit-beta/_atom.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/composites/review-and-commit.md, framework/atoms/review.md, framework/atoms/commit-beta.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Task: Review and Commit
 

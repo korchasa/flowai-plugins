@@ -10,7 +10,7 @@ argument-hint: task description or issue URL
 effort: high
 ---
 
-<!-- GENERATED FROM framework/core/commands/flowai-ship/_composite.md, framework/core/commands/flowai-plan-exp-permanent-tasks/_atom.md, framework/core/skills/flowai-do/_atom.md, framework/core/skills/flowai-review/_atom.md, framework/core/commands/flowai-commit-beta/_atom.md, framework/core/commands/flowai-push/_atom.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/composites/ship.md, framework/atoms/plan-exp-permanent-tasks.md, framework/atoms/do.md, framework/atoms/review.md, framework/atoms/commit-beta.md, framework/atoms/push.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Task: Full-Cycle Ship — Plan, Implement, Review, Commit, Push
 

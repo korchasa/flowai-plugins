@@ -9,7 +9,7 @@ disable-model-invocation: true
 argument-hint: optional branch name (defaults to current branch)
 ---
 
-<!-- GENERATED FROM framework/core/commands/flowai-push/_atom.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/atoms/push.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Task: Safe Git Push
 
