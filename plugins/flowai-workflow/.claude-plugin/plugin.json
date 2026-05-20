@@ -1,0 +1,11 @@
+{
+  "name": "flowai-workflow",
+  "description": "Scaffold and supervise flowai-workflow — DAG-based engine for orchestrating AI agents. Wraps `flowai-workflow init` for setup and supervises live runs with diagnose-and-resume on failure.\n",
+  "version": "0.12.19",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "homepage": "https://github.com/korchasa/flowai#claude-code-plugin-marketplace",
+  "license": "MIT"
+}
