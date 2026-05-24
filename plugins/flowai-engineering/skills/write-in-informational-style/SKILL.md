@@ -1,5 +1,5 @@
 ---
-name: flowai-write-in-informational-style
+name: write-in-informational-style
 description: How to write in informational style
 ---
 

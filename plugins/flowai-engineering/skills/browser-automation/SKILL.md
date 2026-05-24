@@ -1,5 +1,5 @@
 ---
-name: flowai-browser-automation
+name: browser-automation
 description: >-
   Automates browser interactions for web testing, form filling, screenshots, and
   data extraction. Use when the user needs to navigate websites, interact with

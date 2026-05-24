@@ -1,0 +1,27 @@
+{
+  "name": "flowai",
+  "version": "0.13.0",
+  "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "keywords": [
+    "ai",
+    "workflow",
+    "framework",
+    "flowai"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "flowai core",
+    "shortDescription": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
+    "developerName": "korchasa",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ]
+  },
+  "license": "MIT"
+}

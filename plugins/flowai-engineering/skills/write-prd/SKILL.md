@@ -1,5 +1,5 @@
 ---
-name: flowai-write-prd
+name: write-prd
 description: Guidelines for writing comprehensive Product Requirements Documents (PRD)
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: flowai-manage-github-tickets
+name: manage-github-tickets
 description: >-
   Create and manage GitHub issues using the GODS framework. Use when creating,
   updating, or triaging GitHub issues.
@@ -24,7 +24,7 @@ GitHub tool is available in your environment.
      for manual creation.
 
 2. **Compose Issue in GODS Format**
-   - All tickets MUST follow the GODS framework (see `flowai-write-gods-tasks`).
+   - All tickets MUST follow the GODS framework (see `write-gods-tasks`).
    - All tickets and messages MUST be in English.
    - Structure:
      - **Goal**: Why? Business value.
@@ -72,4 +72,4 @@ rapidly changing requirements.
 **Solution:** Roll back the plugin, patch, or change the tool after log analysis.
 ```
 
-For more examples, see `flowai-write-gods-tasks`.
+For more examples, see `write-gods-tasks`.

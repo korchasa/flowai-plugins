@@ -1,0 +1,11 @@
+{
+  "name": "flowai",
+  "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
+  "version": "0.13.0",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "homepage": "https://github.com/korchasa/flowai#claude-code-plugin-marketplace",
+  "license": "MIT"
+}

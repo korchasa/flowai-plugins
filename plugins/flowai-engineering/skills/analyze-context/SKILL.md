@@ -1,5 +1,5 @@
 ---
-name: flowai-analyze-context
+name: analyze-context
 description: >-
   Analyze total token usage including conversation history, system prompts, and
   active rules to estimate cost.

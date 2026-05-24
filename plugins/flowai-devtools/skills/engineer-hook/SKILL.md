@@ -1,5 +1,5 @@
 ---
-name: flowai-engineer-hook
+name: engineer-hook
 description: >-
   Creation and configuration of event hooks/plugins to manage agent behavior,
   command filtering, auditing, and automation. Works across IDEs (Cursor, Claude

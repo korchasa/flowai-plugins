@@ -1,5 +1,5 @@
 ---
-name: flowai-engineer-rule
+name: engineer-rule
 description: >-
   Guide for creating persistent AI rules (coding standards, project conventions,
   file-specific patterns). Use when users want to create a rule, add coding

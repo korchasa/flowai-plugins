@@ -6,10 +6,10 @@
   "description": "AssistFlow framework — Claude Code plugin marketplace",
   "plugins": [
     {
-      "name": "flowai-core",
-      "source": "./plugins/flowai-core",
+      "name": "flowai",
+      "source": "./plugins/flowai",
       "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
-      "version": "0.12.19",
+      "version": "0.13.0",
       "keywords": [
         "ai",
         "workflow",
@@ -22,7 +22,7 @@
       "name": "flowai-deno",
       "source": "./plugins/flowai-deno",
       "description": "Deno-specific skills (CLI, deploy, configure commands)",
-      "version": "0.12.19",
+      "version": "0.13.0",
       "keywords": [
         "ai",
         "workflow",
@@ -35,7 +35,7 @@
       "name": "flowai-devtools",
       "source": "./plugins/flowai-devtools",
       "description": "Skill and agent authoring tools (engineer-skill, engineer-command, benchmarks, etc.)",
-      "version": "0.12.19",
+      "version": "0.13.0",
       "keywords": [
         "ai",
         "workflow",
@@ -48,7 +48,7 @@
       "name": "flowai-engineering",
       "source": "./plugins/flowai-engineering",
       "description": "Procedural engineering knowledge (deep-research, fix-tests, draw-diagrams, write-prd, etc.)",
-      "version": "0.12.19",
+      "version": "0.13.0",
       "keywords": [
         "ai",
         "workflow",
@@ -61,7 +61,7 @@
       "name": "flowai-memex",
       "source": "./plugins/flowai-memex",
       "description": "Memex — long-term knowledge bank for AI agents. Skills that ingest sources, answer questions with citations, and audit the bank for orphans, dead links, and contradictions.",
-      "version": "0.12.19",
+      "version": "0.13.0",
       "keywords": [
         "ai",
         "workflow",
@@ -74,20 +74,7 @@
       "name": "flowai-typescript",
       "source": "./plugins/flowai-typescript",
       "description": "TypeScript-specific setup skills (code style, strict mode)",
-      "version": "0.12.19",
-      "keywords": [
-        "ai",
-        "workflow",
-        "framework",
-        "assistflow"
-      ],
-      "category": "development-workflows"
-    },
-    {
-      "name": "flowai-workflow",
-      "source": "./plugins/flowai-workflow",
-      "description": "Scaffold and supervise flowai-workflow — DAG-based engine for orchestrating AI agents. Wraps `flowai-workflow init` for setup and supervises live runs with diagnose-and-resume on failure.\n",
-      "version": "0.12.19",
+      "version": "0.13.0",
       "keywords": [
         "ai",
         "workflow",

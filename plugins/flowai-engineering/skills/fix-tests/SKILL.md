@@ -1,5 +1,5 @@
 ---
-name: flowai-fix-tests
+name: fix-tests
 description: How to fix tests
 effort: high
 ---

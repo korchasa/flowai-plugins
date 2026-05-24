@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "deno run -A ${CLAUDE_PLUGIN_ROOT}/hooks/flowai-memex-status/run.ts",
+            "command": "deno run -A ${CLAUDE_PLUGIN_ROOT}/hooks/status/run.ts",
             "timeout": 10
           }
         ]

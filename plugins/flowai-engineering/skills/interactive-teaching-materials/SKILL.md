@@ -1,5 +1,5 @@
 ---
-name: flowai-interactive-teaching-materials
+name: interactive-teaching-materials
 description: >-
   Creates interactive HTML teaching materials with clickable state diagrams. Use
   when the user asks to produce an explorable tutorial artifact, not to answer a
@@ -13,7 +13,7 @@ effort: high
 
 The diagram is a navigation surface. Every element is clickable and opens a detail panel with rich text. The value is in the details, not in the arrows.
 
-When one-word labels on arrows are enough — use Mermaid (`flowai-draw-mermaid-diagrams`). This format is for when every state and transition deserves paragraphs of context, config snippets, HTTP payloads, and debugging tips.
+When one-word labels on arrows are enough — use Mermaid (`draw-mermaid-diagrams`). This format is for when every state and transition deserves paragraphs of context, config snippets, HTTP payloads, and debugging tips.
 
 ## Principles
 

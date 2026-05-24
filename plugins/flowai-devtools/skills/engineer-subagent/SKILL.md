@@ -1,5 +1,5 @@
 ---
-name: flowai-engineer-subagent
+name: engineer-subagent
 description: >-
   Guide for creating effective Subagents (custom agent definitions). Use when
   users want to create a new subagent, set up task-specific agents, configure

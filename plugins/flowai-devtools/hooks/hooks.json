@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "deno run -A ${CLAUDE_PLUGIN_ROOT}/hooks/flowai-skill-structure-validate/run.ts",
+            "command": "deno run -A ${CLAUDE_PLUGIN_ROOT}/hooks/skill-structure-validate/run.ts",
             "timeout": 30
           }
         ]

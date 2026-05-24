@@ -1,5 +1,5 @@
 ---
-name: flowai-write-gods-tasks
+name: write-gods-tasks
 description: How to write tasks using GODS framework
 ---
 

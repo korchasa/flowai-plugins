@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "flowai-core",
+      "name": "flowai",
       "source": {
         "source": "local",
-        "path": "./plugins/flowai-core"
+        "path": "./plugins/flowai"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -69,18 +69,6 @@
       "source": {
         "source": "local",
         "path": "./plugins/flowai-typescript"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "flowai-workflow",
-      "source": {
-        "source": "local",
-        "path": "./plugins/flowai-workflow"
       },
       "policy": {
         "installation": "AVAILABLE",

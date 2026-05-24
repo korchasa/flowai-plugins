@@ -1,12 +1,12 @@
 ---
-name: flowai-diagnose-benchmark-failure
+name: diagnose-benchmark-failure
 description: >-
   Use when a flowai benchmark fails and you need the cause from run artifacts
   before editing. Reads judge-evidence.md, the sandbox SKILL.md, and scenario
   mod.ts; classifies the failure against a known taxonomy; produces an
   evidence-grounded report (no fixes). Do NOT trigger for passing benchmarks or
   generic skill iteration.
-argument-hint: scenario-id (e.g. flowai-plan-interactive)
+argument-hint: scenario-id (e.g. plan-interactive)
 effort: medium
 ---
 
@@ -40,7 +40,7 @@ evidence-first diagnosis so each iteration moves on facts, not hopes.
 
 ## Inputs
 
-- A scenario ID (e.g. `flowai-plan-interactive`). Inferred from the user
+- A scenario ID (e.g. `plan-interactive`). Inferred from the user
   prompt or from the most recent failure in the bench output.
 
 ## Step-by-step
@@ -161,7 +161,7 @@ listed.
     SKILL.md.
 
 - **COMPOSITE-DELEGATION-BYPASS**
-  - Symptom: composite skill (e.g. `flowai-review-and-commit`) was invoked,
+  - Symptom: composite skill (e.g. `review-and-commit`) was invoked,
     but `<agent_logs>` shows an early `## Tool: Skill { skill: "<source-skill>" }`
     re-entering one of the inlined sources, bypassing the composite's gate.
   - Cause: the composite's frontmatter description names the source skills,

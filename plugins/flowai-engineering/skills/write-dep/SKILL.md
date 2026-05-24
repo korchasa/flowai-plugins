@@ -1,5 +1,5 @@
 ---
-name: flowai-write-dep
+name: write-dep
 description: >-
   Writing a Development Enhancement Proposal (DEP) - a document for proposing
   technical improvements

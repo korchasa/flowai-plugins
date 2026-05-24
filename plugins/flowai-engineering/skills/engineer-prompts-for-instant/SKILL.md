@@ -1,5 +1,5 @@
 ---
-name: flowai-engineer-prompts-for-instant
+name: engineer-prompts-for-instant
 description: >-
   Guide for writing stable, effective prompts for instant/fast models (Gemini
   Flash, GPT-4o Mini, Haiku), suitable for beginners.

@@ -1,5 +1,5 @@
 ---
-name: flowai-write-agent-benchmarks
+name: write-agent-benchmarks
 description: >-
   Create, maintain, and run evidence-based benchmarks for AI agents. Use when
   setting up testing infrastructure, writing new test scenarios, or evaluating
@@ -211,7 +211,7 @@ Execution scenarios prove "when skill X runs, it works." They do NOT prove that 
 
 ### Scope and shape
 
-- **Applies to:** every skill under `framework/<pack>/skills/flowai-*/`. Commands (`commands/`) carry `disable-model-invocation: true` and are out of scope.
+- **Applies to:** every skill under `framework/<pack>/skills/*`. Commands (`commands/`) carry `disable-model-invocation: true` and are out of scope.
 - **Per skill:** exactly 3 scenarios — 1 positive, 1 adjacent-negative, 1 false-use-negative.
 - **Layout:** sibling folders to existing scenarios:
   ```

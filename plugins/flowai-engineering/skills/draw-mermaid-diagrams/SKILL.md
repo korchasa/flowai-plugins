@@ -1,5 +1,5 @@
 ---
-name: flowai-draw-mermaid-diagrams
+name: draw-mermaid-diagrams
 description: >-
   Draw and edit Mermaid diagrams in Markdown. Use when the user wants to
   visualize processes, flows, sequences, or asks for diagrams.
