@@ -1,6 +1,6 @@
 {
   "name": "flowai-typescript",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "TypeScript-specific setup skills (code style, strict mode)",
   "author": {
     "name": "korchasa"
@@ -14,7 +14,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "flowai typescript",
+    "displayName": "flowai-typescript",
     "shortDescription": "TypeScript-specific setup skills (code style, strict mode)",
     "developerName": "korchasa",
     "category": "Productivity",

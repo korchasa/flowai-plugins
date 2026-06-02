@@ -10,7 +10,7 @@ argument-hint: task description or issue URL
 effort: high
 ---
 
-<!-- GENERATED FROM framework/composites/ship.md, framework/atoms/plan-exp-permanent-tasks.md, framework/atoms/implement.md, framework/atoms/review.md, framework/atoms/commit.md, framework/atoms/push.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/composites/ship.md, framework/atoms/plan.md, framework/atoms/implement.md, framework/atoms/review.md, framework/atoms/commit.md, framework/atoms/push.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Task: Full-Cycle Ship — Plan, Implement, Review, Commit, Push
 
@@ -18,7 +18,7 @@ effort: high
 
 Single user-invoked command that drives a task end-to-end and reaches the remote in one invocation:
 
-1. **Plan Phase** — write a committed plan at `documents/tasks/<YYYY>/<MM>/<slug>.md`.
+1. **Plan Phase** — write a committed plan under the `tasks` role resolved from AGENTS.md.
 2. **Implement Phase** — execute the Solution under TDD (RED → GREEN → REFACTOR → CHECK).
 3. **Review Phase** — QA + lead-engineer review of the diff with a structured verdict.
 4. **Commit Phase** — targeted documentation sync + Conventional Commits + task-status auto-flip.
@@ -60,18 +60,19 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
 
 1. **Initialize**
    - Use a task management tool (e.g., `todo_write`, `todowrite`) to create a plan based on these steps.
-   - Compute today's date in `YYYY-MM-DD` format (e.g. via `date +%Y-%m-%d` or your environment's date primitive). Hold it as `<DATE>`. Derive `<YYYY>`, `<MM>`, `<DD>` (zero-padded) and the eventual file path `documents/tasks/<YYYY>/<MM>/<slug>.md`.
+   - Compute today's date in `YYYY-MM-DD` format (e.g. via `date +%Y-%m-%d` or your environment's date primitive). Hold it as `<DATE>`. Derive `<YYYY>` and `<MM>` (zero-padded). Resolve the `tasks` role from AGENTS.md and then derive the eventual task file path from that role's layout.
 2. **Deep Context & Uncertainty Resolution**
-   - If you don't know the content of `documents/requirements.md` (SRS) and `documents/design.md` (SDS) — read them now.
-   - **Load related committed tasks**: glob `documents/tasks/**/*.md` (the path is recursive — task files live under date-hierarchy subdirs `<YYYY>/<MM>/<slug>.md`). For each found file, parse its YAML frontmatter `implements:` field. Keep only tasks whose `implements:` set has a non-empty intersection with the FR-IDs you are about to put in the new task's `implements:`. Cap at 10 by recency (newest first by frontmatter `date`); if more match, list IDs in chat without bodies and ask the user which to expand. Read the full body of each kept task before drafting GODS. List the loaded tasks in chat (one bullet per task: file path + matched FR-IDs + one-line summary). If no related tasks exist, say "No prior tasks share FRs with this one — drafting from scratch."
+   - Resolve `SRS` and `SDS` from AGENTS.md. If you don't know their current content, read the resolved files now.
+   - **Load related committed tasks**: glob recursively under the resolved `tasks` role. For each found file, parse its YAML frontmatter `implements:` field. Keep only tasks whose `implements:` set has a non-empty intersection with the FR-IDs you are about to put in the new task's `implements:`. Cap at 10 by recency (newest first by frontmatter `date`); if more match, list IDs in chat without bodies and ask the user which to expand. Read the full body of each kept task before drafting GODS. List the loaded tasks in chat (one bullet per task: file path + matched FR-IDs + one-line summary). If no related tasks exist, say "No prior tasks share FRs with this one — drafting from scratch."
    - Follow `Proactive Resolution` from AGENTS.md: analyze prompt, codebase, search for gaps.
    - Use search tools (e.g., `glob`, `grep`, `ripgrep`, `search`, `webfetch`) for unknowns.
    - If uncertainties remain: ask user clarifying questions. STOP and wait.
 3. **Draft Framework (G-O-D)**
-   - Create the parent directories `documents/tasks/<YYYY>/<MM>/` (use `mkdir -p` or your environment's equivalent).
-   - Write `documents/tasks/<YYYY>/<MM>/<slug>.md` with:
+   - Create the resolved task file's parent directories (use `mkdir -p` or your environment's equivalent).
+   - Write the resolved task file with:
      - Frontmatter containing ALL required keys per Rule 9. Set `status: to do` initially.
      - Body sections per `### GODS Format` from AGENTS.md: `## Goal`, `## Overview` (with `### Context`, `### Current State`, `### Constraints`), `## Definition of Done` (placeholder bullets — fill in step 5a).
+     - For async/callback conversions, include an explicit error-handling DoD item or constraint before variant selection: how callback errors map to Promise rejection / `try`-`catch`, and which tests prove error propagation is preserved.
    - **CRITICAL**: Do NOT fill `## Solution` section yet.
 4. **Strategic Analysis & Variant Selection**
    - Generate variants in chat following `Variant Analysis` from AGENTS.md.
@@ -91,10 +92,10 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
 5a. **Acceptance Tuple Check** — execute immediately, no permission needed
    - Walk every entry in `## Definition of Done`. For each, confirm the tuple `(FR-ID, Test path or Benchmark id, Evidence command)` is present and concrete (no placeholders like `<TBD>` or `TODO`). `manual — <reviewer>` is acceptable only with an explicit reviewer name.
    - If any DoD item lacks the tuple, edit the task file to add it. Prefer reusing an existing FR (for bug fixes and small refactors) over coining a new one. Only introduce a new FR for user-visible or contract-level changes.
-   - If new FRs appear in `implements:` that are absent from `documents/requirements.md`, the task MUST contain an explicit DoD entry "add FR-XXX section to SRS with `**Acceptance:**` field filled".
+   - If new FRs appear in `implements:` that are absent from the resolved `SRS`, the task MUST contain an explicit DoD entry "add FR-XXX section to SRS with `**Acceptance:**` field filled".
    - Do NOT create the test files themselves — that is the develop phase's RED step. This skill only FIXES the test location contract.
 5c. **Write SRS-inline `**Tasks:**` Back-Pointer (FR-DOC-TASK-LINK)** — execute immediately, no permission needed. This is a write step.
-   - For each FR-ID in the task's `implements:` frontmatter, locate the heading `### <FR-ID>:` in `documents/requirements.md`.
+   - For each FR-ID in the task's `implements:` frontmatter, locate the heading `### <FR-ID>:` in the resolved `SRS`.
    - If the heading does not exist (new FR introduced by the same task), SKIP this FR for now and emit a chat note: "FR-XXX SRS section pending — task back-pointer deferred." The develop/commit phase will add the section AND the back-pointer atomically.
    - If the heading exists, find the section's existing `**Description:**` bullet (`- **Description:** ...`). Look at the line(s) immediately following it within the same section.
      - If a `- **Tasks:** [...]` bullet already exists: append `, [<slug>](tasks/<YYYY>/<MM>/<slug>.md)` to the comma-separated list. **Idempotency**: if the exact link `[<slug>](tasks/...)` is already in the list, do nothing for that FR.
@@ -102,8 +103,8 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
    - **Surgical edit only**: the rest of the SRS file MUST remain byte-identical. Do not re-format, do not touch other sections, do not adjust whitespace anywhere except the inserted/extended line.
 
 5b. **Update Documentation Index (FR-DOC-INDEX)** — execute immediately, no permission needed. This is a write step, not a planning step.
-   - For every FR-ID in the task's `implements:` frontmatter, register a row in `./documents/index.md`.
-   - If `documents/index.md` does not exist, create it with a `## FR` heading (additional sections like `## SDS`, `## NFR` may be added by other skills; do not pre-scaffold them here).
+   - Resolve `index` from AGENTS.md. For every FR-ID in the task's `implements:` frontmatter, register a row there.
+   - If the resolved `index` file does not exist, create it with a `## FR` heading (additional sections like `## SDS`, `## NFR` may be added by other skills; do not pre-scaffold them here).
    - Within `## FR`, ensure exactly one row per FR-ID. Row format:
      `- [<FR-ID>](requirements.md#<anchor>) — <one-line summary> — <status>`
      - `<anchor>` — GFM auto-slug of the SRS heading `### <FR-ID>: <title>` (lowercase, non-alphanumeric → `-`, collapse runs, strip leading/trailing `-`). If the SRS section does not yet exist, use the placeholder `<fr-id-lowercased>-tbd` (e.g. `fr-pause-tbd`); develop/commit will fix the anchor when the SRS section is added.
@@ -123,7 +124,7 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
    - Do NOT ask the user which items to address — the triage IS the answer. Do NOT prompt with phrases like "which would you like addressed", "should I apply", "do you want me to incorporate".
    - Report the applied/discarded/deferred counts in chat so the user can override any classification on their next turn.
 8. **Hand off to the next phase**
-   - Announce: "Plan complete at `documents/tasks/<YYYY>/<MM>/<slug>.md`. Entering the next phase."
+   - Announce the resolved task path and: "Entering the next phase."
    - Do NOT issue a TOTAL STOP. Continue immediately into the next phase of the composite workflow.
 
 </step_by_step>
@@ -139,7 +140,7 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
 <step_by_step>
 
 1. **Re-read the Task File**
-   - Read `documents/tasks/<YYYY>/<MM>/<slug>.md` from disk (do NOT rely on memory). The user MUST tell you the path; if it is missing, ask once.
+   - Read the user-provided task file from disk (do NOT rely on memory). If the user gives only an identifier, resolve the `tasks` role from AGENTS.md and locate the matching task there. The user MUST provide either a path or an unambiguous task identifier; if it is missing, ask once.
    - Extract the `## Solution` section. The implementation steps listed there are authoritative.
    - Re-plan the todo list with the Solution's concrete steps. One todo item per RED/GREEN/REFACTOR/CHECK iteration is acceptable, but ensure every Solution bullet is represented.
 
@@ -212,10 +213,11 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
      in Degradation Notes; review continues without the JiT subset.
 
 3. **Gather Context**
-   - **First**: check if `documents/requirements.md` (SRS) and
-     `documents/design.md` (SDS) exist (`ls documents/` or equivalent). If
-     they exist and their current content is not already in your context —
-     read them before proceeding.
+   - **First**: resolve `SRS`, `SDS`, and `tasks` from AGENTS.md. If `SRS` or
+     `SDS` exists and its current content is not already in your context —
+     read the resolved file before proceeding. If a required role is missing,
+     report it and continue only for review steps that do not depend on that
+     role.
    - Create a review plan in the task management tool.
    - Collect the diff: `git diff` (unstaged), `git diff --cached` (staged),
      or `git log --oneline <base>..HEAD` + `git diff <base>..HEAD` for
@@ -223,8 +225,8 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
    - **Untracked files**: `git diff` does NOT show untracked files. Check
      `git status` output from step 1 — for each untracked file, read its
      content directly and include it in the review scope.
-   - Read the original user request and the plan (task file in
-     `documents/tasks/` / task list).
+   - Read the original user request and the plan (task file under the
+     resolved `tasks` role / task list).
    - Look for project conventions in config files (linter, formatter configs).
      Rely on conventions visible in the diff and surrounding code.
    - **3d (intent hints — JiT)**: collect intent-author hints for the JiT
@@ -267,7 +269,7 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
    - Check for regressions: do changed files break existing functionality?
 
 4a. **FR Coverage Audit** _(blocking gate — see Requirements Lifecycle in AGENTS.md)_
-   - **Identify FRs in scope**: (a) FR-* codes from the task file's `implements:` frontmatter; (b) any FR section added or modified in the diff to `documents/requirements.md`; (c) any `// FR-<ID>` / `# FR-<ID>` markers introduced or touched in the diff.
+   - **Identify FRs in scope**: (a) FR-* codes from the task file's `implements:` frontmatter; (b) any FR section added or modified in the diff to the resolved `SRS`; (c) any `// FR-<ID>` / `# FR-<ID>` markers introduced or touched in the diff.
    - **For each FR in scope**:
      1. SRS section MUST contain `**Acceptance:**` with a runnable reference (test `path::name`, benchmark id, verification command, or `manual — <reviewer>`). Missing or placeholder (`<TBD>`, `TODO`) → `[critical] FR-<ID> has no acceptance reference`.
      2. Run the evidence command (or `deno run -A scripts/check-fr-coverage.ts FR-<ID>` if the script exists). Non-zero exit, failing test, or `manual` without a reviewer name → `[critical] FR-<ID> acceptance fails`.
@@ -438,7 +440,7 @@ After completing the Review report:
      - For **new** functionality with no corresponding section → add a new section.
      - For **removed** functionality → remove the section.
    - **Gather change context** for commit message and doc updates:
-     1. **Active task file**: If the user referenced a task file in this session, read it from `documents/tasks/`. Do NOT scan all task files.
+     1. **Active task file**: If the user referenced a task file in this session, resolve `tasks` from AGENTS.md and read that file there. Do NOT scan all task files.
      2. **Session context**: User messages explaining intent, decisions, requirements.
    - **Apply Compression Rules** to any doc updates:
      - Use combined extractive + abstractive summarization (preserve all facts, minimize words).
@@ -458,10 +460,10 @@ After completing the Review report:
    - **Iterate** through the planned groups:
      1. Stage specific files for the group.
      2. Verify the staged content matches the group's intent.
-     3. **Task Status Lifecycle** (FR-DOC-TASK-LIFECYCLE) — for each staged `documents/tasks/**/*.md` with `date:` frontmatter (skip legacy flat-path), count top-level `- [ ]`/`- [x]` items in `## Definition of Done`. Derive `status`: `K=0→"to do"`, `0<K<N→"in progress"`, `K=N→"done"` (warn if no DoD). Rewrite frontmatter and `git add` if it differs. Idempotent. Never downgrade `done`. Warn-only on parse errors.
+     3. **Task Status Lifecycle** (FR-DOC-TASK-LIFECYCLE) — for each staged task file under the resolved `tasks` role with `date:` frontmatter (skip legacy flat-path), first check frontmatter `status:`. If it is `superseded`, require/keep `superseded_by:` and skip DoD derivation because the stale original DoD no longer maps to current reality. Otherwise count top-level `- [ ]`/`- [x]` items in `## Definition of Done`. Derive `status`: `K=0→"to do"`, `0<K<N→"in progress"`, `K=N→"done"` (warn if no DoD). Rewrite frontmatter and `git add` if it differs. Idempotent. Never downgrade `done`. Warn-only on parse errors.
      4. Commit with a Conventional Commits message (including any task-status frontmatter edit).
 5. **Task file Cleanup** _(only if a task file was used in step 2)_
-   - **New-shape tasks** (`documents/tasks/<YYYY>/<MM>/<slug>.md` with `date:` frontmatter): NEVER delete — persistent canonical records. Status auto-flip in step 4.3 is the only lifecycle action.
+   - **New-shape tasks** (task files under the resolved `tasks` role with `date:` frontmatter): NEVER delete — persistent canonical records. Status auto-flip in step 4.3 is the only lifecycle action for non-superseded tasks; `status: superseded` records are preserved.
    - **Legacy tasks** (flat path, no `date:` frontmatter): if all DoD items satisfied → `git rm` and commit; if any unsatisfied → ask user "Delete or keep?"; if no DoD → ask user.
 6. **Session Complexity Check → Auto-Invoke Reflect**
    - After all commits are done, analyze the current conversation for complexity signals:
@@ -535,7 +537,7 @@ Output a combined summary:
 ## Verification
 
 <verification>
-[ ] Plan Phase produced a task file at `documents/tasks/<YYYY>/<MM>/<slug>.md` with required frontmatter.
+[ ] Plan Phase produced a task file under the resolved `tasks` role with required frontmatter.
 [ ] Plan → Implement gate enforced — Solution section filled only after user picked a variant.
 [ ] Implement Phase ran TDD (RED → GREEN → REFACTOR → CHECK).
 [ ] Implement → Review gate enforced: project check exit 0 AND `git status` non-empty.

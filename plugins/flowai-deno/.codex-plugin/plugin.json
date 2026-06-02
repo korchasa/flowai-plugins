@@ -1,6 +1,6 @@
 {
   "name": "flowai-deno",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "Deno-specific skills (CLI, deploy, configure commands)",
   "author": {
     "name": "korchasa"
@@ -14,7 +14,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "flowai deno",
+    "displayName": "flowai-deno",
     "shortDescription": "Deno-specific skills (CLI, deploy, configure commands)",
     "developerName": "korchasa",
     "category": "Productivity",

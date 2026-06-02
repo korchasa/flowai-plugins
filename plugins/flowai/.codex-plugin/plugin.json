@@ -1,6 +1,6 @@
 {
   "name": "flowai",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
   "author": {
     "name": "korchasa"
@@ -14,7 +14,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "flowai core",
+    "displayName": "flowai",
     "shortDescription": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
     "developerName": "korchasa",
     "category": "Productivity",
