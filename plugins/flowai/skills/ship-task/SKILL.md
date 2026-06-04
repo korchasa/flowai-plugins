@@ -443,18 +443,22 @@ After completing the Review report:
    - Final report: target branch, upstream, pushed SHA, post-push verification result, CI await result (`skipped`, `green`, or `not reached — stopped earlier`).`).
      - **Malformed** (missing either `Provider:` or `Status command:`): STOP with `## CI/CD section is malformed — required keys: Provider, Status command. Found: <list of present keys>.` Do NOT silently fall back. Do NOT continue to step 7.
      - **Well-formed**: continue.
+   - **Resolve tunables** (optional keys in `## CI/CD`):
+     - `Poll interval:` — seconds between status polls. Default `60`. Accept integer seconds; a value `<5` is treated as malformed and STOPs the atom.
+     - `Wall-clock budget:` — soft cap on total await time. Default `1800` (30 min). Accept integer seconds.
+     - Compute `ITER_CAP = max(1, ceil(<budget> / <poll interval>))`. The iteration count — NOT wall-clock — bounds the cap so it stays deterministic across IDE-harness latencies. With defaults, `ITER_CAP = 30`; a project that sets `Poll interval: 10` and `Wall-clock budget: 60` gets `ITER_CAP = 6`.
    - Export the pushed SHA into the environment: `export SHA=$(git rev-parse HEAD)`. All CI commands below inherit `$SHA` from the agent's shell.
    - **Detect run trigger** (≤60 s window; sized at ~2× the slowest realistic provider lag, observed ~30 s for GitLab pipelines registering after push): invoke the `Status command`. Treat:
      - exit 0 or 1 (terminal on first call) → proceed straight to the poll loop branch.
      - exit 2 (in-progress — a run exists) → proceed to the poll loop.
      - any other exit → sleep 5 s and retry. After 12 retries (60 s) with no run detected, STOP with `CI declared but no run was triggered by $SHA within 60 s — verify the workflow trigger configuration.` Do NOT continue to step 7.
-   - **Poll loop** (max 30 iterations × 60 s sleep ≈ 30 min wall-clock; the iteration count — NOT wall-clock — bounds the cap so it stays deterministic across IDE-harness latencies):
+   - **Poll loop** (max `ITER_CAP` iterations × `<poll interval>` s sleep ≈ `<wall-clock budget>` wall-clock):
      - Invoke the `Status command`.
      - exit 0 → CI green. Continue to step 7.
      - exit 1 → CI red (terminal failure). Go to **Investigate Handoff** below.
-     - exit 2 → still running. Sleep 60 s. Re-invoke. Increment iteration counter.
+     - exit 2 → still running. Sleep `<poll interval>` s. Re-invoke. Increment iteration counter.
      - any other exit → treat as a malformed Status command, STOP with the raw exit code and stderr.
-   - **30-iteration cap**: if 30 iterations completed without a terminal status (exit 0 or 1), STOP with `CI did not finish within 30 iterations (~30 min) — timed out. Run URL: <result of Run URL command if defined, otherwise "not available">.` Do NOT invoke `investigate`. Do NOT continue to step 7.
+   - **Iteration cap (anomaly)**: if `ITER_CAP` iterations completed without a terminal status (exit 0 or 1), STOP with a loud single-line message: `CI ANOMALY: <ITER_CAP> iterations × <poll interval>s = <budget>s elapsed without a terminal verdict. Run URL: <result of Run URL command if defined, otherwise "not available">. Last status exit: 2 (in-progress). Treat as an incident (hanging job, queue starvation, runner outage) — do NOT continue silently.` Do NOT invoke `investigate` (no failed-job logs to feed it yet — the build is still running, not red). Do NOT continue to step 7. The user owns the next action: extend the budget by re-running the atom after raising `Wall-clock budget`, cancel the CI run, or investigate the runner.
    - **Investigate Handoff** (CI red):
      1. If the `Logs command` is defined in AGENTS.md, execute it. Capture stdout. Truncate to 12 KB (`investigate` can fetch more via the run URL if it needs to drill deeper).
      2. If the `Run URL command` is defined, execute it. Capture stdout as the run URL.

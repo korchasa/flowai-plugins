@@ -1,6 +1,6 @@
 {
   "name": "flowai-typescript",
-  "version": "0.13.6",
+  "version": "0.13.7",
   "description": "TypeScript-specific setup skills (code style, strict mode)",
   "author": {
     "name": "korchasa"
