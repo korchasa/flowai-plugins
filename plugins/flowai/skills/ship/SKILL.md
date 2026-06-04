@@ -98,16 +98,16 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
    - For each FR-ID in the task's `implements:` frontmatter, locate the heading `### <FR-ID>:` in the resolved `SRS`.
    - If the heading does not exist (new FR introduced by the same task), SKIP this FR for now and emit a chat note: "FR-XXX SRS section pending — task back-pointer deferred." The develop/commit phase will add the section AND the back-pointer atomically.
    - If the heading exists, find the section's existing `**Description:**` bullet (`- **Description:** ...`). Look at the line(s) immediately following it within the same section.
-     - If a `- **Tasks:** [...]` bullet already exists: append `, [<slug>](tasks/<YYYY>/<MM>/<slug>.md)` to the comma-separated list. **Idempotency**: if the exact link `[<slug>](tasks/...)` is already in the list, do nothing for that FR.
-     - If no `**Tasks:**` bullet exists yet: insert a new line `- **Tasks:** [<slug>](tasks/<YYYY>/<MM>/<slug>.md)` immediately AFTER the `**Description:**` bullet (before any other bullets in the section).
+     - If a `- **Tasks:** [...]` bullet already exists: append `, [REF:task:<YYYY>-<MM>-<slug> | <slug>]` to the comma-separated list. **Idempotency**: if the exact SALP REF is already in the list, do nothing for that FR.
+     - If no `**Tasks:**` bullet exists yet: insert a new line `- **Tasks:** [REF:task:<YYYY>-<MM>-<slug> | <slug>]` immediately AFTER the `**Description:**` bullet (before any other bullets in the section). The `task:` namespace id is `<YYYY>-<MM>-<slug>` (e.g. `2026-06-adopt-salp-anchors`), derived from the task file's path.
    - **Surgical edit only**: the rest of the SRS file MUST remain byte-identical. Do not re-format, do not touch other sections, do not adjust whitespace anywhere except the inserted/extended line.
 
 5b. **Update Documentation Index (FR-DOC-INDEX)** — execute immediately, no permission needed. This is a write step, not a planning step.
    - Resolve `index` from AGENTS.md. For every FR-ID in the task's `implements:` frontmatter, register a row there.
    - If the resolved `index` file does not exist, create it with a `## FR` heading (additional sections like `## SDS`, `## NFR` may be added by other skills; do not pre-scaffold them here).
-   - Within `## FR`, ensure exactly one row per FR-ID. Row format:
-     `- [<FR-ID>](requirements.md#<anchor>) — <one-line summary> — <status>`
-     - `<anchor>` — GFM auto-slug of the SRS heading `### <FR-ID>: <title>` (lowercase, non-alphanumeric → `-`, collapse runs, strip leading/trailing `-`). If the SRS section does not yet exist, use the placeholder `<fr-id-lowercased>-tbd` (e.g. `fr-pause-tbd`); develop/commit will fix the anchor when the SRS section is added.
+   - Within `## FR`, ensure exactly one row per FR-ID. Row format (SALP):
+     `- [REF:fr:<id> | <FR-ID>] — <one-line summary> — <status>`
+     - `<id>` — lower-kebab of the FR mnemonic (strip `FR-` prefix, lowercase, preserve `.` for hierarchical IDs like `FR-DIST.MARKETPLACE` → `dist.marketplace`). The reference resolves against the `[ANC:fr:<id>]` token next to the SRS heading. If the SRS section does not yet exist, write the REF anyway — develop/commit will add the matching ANC when the SRS section is added, at which point `scripts/check-salp.ts` will resolve it.
      - `<one-line summary>` — pull from the SRS `**Description:**` first sentence if the section exists, otherwise reuse the task title (or a short paraphrase ≤80 chars).
      - `<status>` — mirror the SRS `**Status:**` value if present, else `[ ]`.
    - Sort rows alphabetically by FR-ID inside `## FR` before writing.
@@ -269,11 +269,11 @@ ship is the terminal composite of the SDLC: by the time the agent exits, work ei
    - Check for regressions: do changed files break existing functionality?
 
 4a. **FR Coverage Audit** _(blocking gate — see Requirements Lifecycle in AGENTS.md)_
-   - **Identify FRs in scope**: (a) FR-* codes from the task file's `implements:` frontmatter; (b) any FR section added or modified in the diff to the resolved `SRS`; (c) any `// FR-<ID>` / `# FR-<ID>` markers introduced or touched in the diff.
+   - **Identify FRs in scope**: (a) FR-* codes from the task file's `implements:` frontmatter; (b) any FR section added or modified in the diff to the resolved `SRS`; (c) any `// [REF:fr:<id>]` / `# [REF:fr:<id>]` SALP markers introduced or touched in the diff.
    - **For each FR in scope**:
      1. SRS section MUST contain `**Acceptance:**` with a runnable reference (test `path::name`, benchmark id, verification command, or `manual — <reviewer>`). Missing or placeholder (`<TBD>`, `TODO`) → `[critical] FR-<ID> has no acceptance reference`.
      2. Run the evidence command (or `deno run -A scripts/check-fr-coverage.ts FR-<ID>` if the script exists). Non-zero exit, failing test, or `manual` without a reviewer name → `[critical] FR-<ID> acceptance fails`.
-     3. Grep the diff for `// FR-<ID>` / `# FR-<ID>` in implementing source files. FR claimed implemented in diff but no marker in changed source → `[critical] FR-<ID> missing code marker`.
+     3. Grep the diff for `// [REF:fr:<id>]` / `# [REF:fr:<id>]` in implementing source files. FR claimed implemented in diff but no SALP marker in changed source → `[critical] FR-<ID> missing code marker`.
      4. Task DoD has `[x]` paired with this FR but no evidence-command run in this session and no cached pass → `[critical] Phantom completion on FR-<ID>`.
    - **Gate**: findings here are blocking. Verdict cannot be `Approve` while any FR-gate issue remains, regardless of other findings.
 
