@@ -1,6 +1,6 @@
 {
-  "name": "flowai-memex",
-  "description": "Memex — long-term knowledge bank for AI agents. Skills that ingest sources, answer questions with citations, and audit the bank for orphans, dead links, and contradictions.",
+  "name": "flowai-beta",
+  "description": "Opt-in beta capabilities not yet promoted to core. Currently ships the doc-anchors-validate Stop hook (SALP anchor/reference integrity check; Claude Code only).",
   "version": "0.13.10",
   "author": {
     "name": "korchasa"
