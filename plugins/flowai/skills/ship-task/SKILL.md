@@ -84,7 +84,7 @@ ship-task is the SDLC continuation composite: by the time the agent exits, work 
    - Confirm no scope creep: every changed file maps to a Solution bullet.
 
 6. **6. **Hand off to the next phase**
-   - Report: Solution steps completed, final check result, files changed (one bullet per file).
+   - Narrate the result UPWARD, not as a diff: (a) requirements / Solution steps satisfied; (b) the class/method structure you produced or changed — names, responsibilities, relationships — in prose the human can follow WITHOUT reading the code; (c) every above-class/method decision you made or surfaced (or "none — purely local"); (d) final check result.
    - Announce: "Implementation complete; entering the next phase of the composite workflow."
    - Do NOT issue a TOTAL STOP. Continue immediately into the next phase.**
 
@@ -186,18 +186,13 @@ ship-task is the SDLC continuation composite: by the time the agent exits, work 
    - Check for regressions: do changed files break existing functionality?
 
 4a. **FR Coverage Audit** _(blocking gate — see Requirements Lifecycle in AGENTS.md)_
-   - **Identify FRs in scope**: (a) FR-* codes from the task file's `implements:` frontmatter; (b) any FR section added or modified in the diff to the resolved `SRS`; (c) any `// [REF:fr:<id>]` / `# [REF:fr:<id>]` SALP markers introduced or touched in the diff.
-   - **For each FR in scope**:
-     1. SRS section MUST contain `**Acceptance:**` with a runnable reference (test `path::name`, benchmark id, verification command, or `manual — <reviewer>`). Missing or placeholder (`<TBD>`, `TODO`) → `[critical] FR-<ID> has no acceptance reference`.
-     2. Run the evidence command (or `deno run -A scripts/check-fr-coverage.ts FR-<ID>` if the script exists). Non-zero exit, failing test, or `manual` without a reviewer name → `[critical] FR-<ID> acceptance fails`.
-     3. Grep the diff for `// [REF:fr:<id>]` / `# [REF:fr:<id>]` in implementing source files. FR claimed implemented in diff but no SALP marker in changed source → `[critical] FR-<ID> missing code marker`.
-     4. Task DoD has `[x]` paired with this FR but no evidence-command run in this session and no cached pass → `[critical] Phantom completion on FR-<ID>`.
-   - **Gate**: findings here are blocking. Verdict cannot be `Approve` while any FR-gate issue remains, regardless of other findings.
+   - **FRs in scope**: (a) FR-* in the task file's `implements:`; (b) FR sections added/modified in the diff to `SRS`; (c) `[REF:fr:<id>]` SALP markers touched in the diff.
+   - **Per FR**: (1) SRS has `**Acceptance:**` with a runnable ref (test `path::name`, benchmark id, command, or `manual — <reviewer>`); missing/placeholder → `[critical] no acceptance reference`. (2) Run the evidence command (or `deno run -A scripts/check-fr-coverage.ts FR-<ID>`); non-zero / failing / `manual` without reviewer → `[critical] acceptance fails`. (3) FR claimed implemented but no `[REF:fr:<id>]` marker in changed source → `[critical] missing code marker`. (4) DoD `[x]` with no evidence run/cached pass → `[critical] Phantom completion`.
+   - **Gate**: blocking — verdict cannot be `Approve` while any FR-gate issue remains.
 
-5. **QA: Hygiene** _(use SA2 result if available; otherwise run inline)_
-   - If SA2 completed: review its findings, deduplicate with own Code Review
-     findings, and merge into the report.
-   - If SA2 failed/timed out or skipped (small diff): perform inline:
+5. **QA: Hygiene** _(use SA2 result if available; else inline)_
+   - SA2 done → dedupe its findings with own Code Review findings and merge.
+   - SA2 failed/timed out or skipped (small diff) → perform inline:
    - **Temp artifacts**: New `temp_*`, `*.tmp`, `*.bak`, debug `console.log`/
      `print` statements, hardcoded secrets or localhost URLs.
    - **Unfinished markers**: New `TODO`, `FIXME`, `HACK`, `XXX` introduced in
@@ -284,11 +279,10 @@ ship-task is the SDLC continuation composite: by the time the agent exits, work 
         same input.
      3. **Zero-kill** — passed on parent, passed on diff, killed no mutant.
 
-9. **Run Automated Checks** _(collect results from step 2 and/or SA1)_
-   - If pre-flight check (step 2a) already ran: use its result. Do NOT re-run.
-   - If SA1 completed with a different/broader check: merge its results.
-   - If neither ran (no check command found): explicitly note "No automated
-     checks configured" in the report — do not silently skip.
+9. **Run Automated Checks** _(collect from step 2 and/or SA1)_
+   - Pre-flight 2a ran → use its result, do NOT re-run. SA1 broader check → merge.
+   - Neither ran (no check command) → note "No automated checks configured" in
+     the report; do not silently skip.
 
 10. **Final Report** — verdict on first line. Include JiT sections (`Intents`,
    `Catching Tests`, `Uncovered Risks`, `Degradation Notes`) only when the
@@ -297,6 +291,7 @@ ship-task is the SDLC continuation composite: by the time the agent exits, work 
 
    ```
    ## Review: [Approve | Request Changes | Needs Discussion]
+   ### Verdict (plain language) — 2–4 sentences a non-coder acts on: task complete? design sound? key risks? next step? Accept WITHOUT reading the diff. MUST come first.
    ### Intents (≤5)
    ### QA Findings — [severity] file:line — description
    ### Code Review Findings — [severity] file:line — description
@@ -305,14 +300,14 @@ ship-task is the SDLC continuation composite: by the time the agent exits, work 
    ### Automated Checks — [pass|fail|skipped] command — summary
    ### Degradation Notes — which JiT step was skipped and why
    ### Summary — requirements X/Y; catching tests N; critical/warning/nit counts
+   ### Diff (optional) — offer diff/details for optional inspection; verdict stands without it; never block (Model B). MUST close the report.
    ```
 
    ≥1 surviving catching test → verdict = `Request Changes` regardless of
-   other findings. Ranking: top-5 by `severity × uniqueness` (severity =
-   plausibility × impact; uniqueness = how many catching tests assert a
-   distinct symptom). No issues AND zero catching tests → "Changes look
-   good. All requirements covered, no issues found, no behavioural
-   regressions detected." (third clause only when JiT actually ran).
+   other findings. Rank findings top-5 by `severity × uniqueness`. No issues
+   AND zero catching tests → "Changes look good. All requirements covered, no
+   issues found, no behavioural regressions detected." (last clause only when
+   JiT actually ran).
 
 11. **Ephemeral Dispose (JiT)** _(skip when no catching tests exist)_ —
    prompt: `save <name>` / `save all` / `discard all`. On `save`: propose
