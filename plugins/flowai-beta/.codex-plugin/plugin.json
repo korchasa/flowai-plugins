@@ -1,0 +1,28 @@
+{
+  "name": "flowai-beta",
+  "version": "0.13.13",
+  "description": "Opt-in beta capabilities not yet promoted to core. Ships the doc-anchors-validate Stop hook (SALP anchor/reference integrity check; Claude Code only) and the select-llm-model skill (task-driven LLM recommender; live-fetched leaderboard data).",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "keywords": [
+    "ai",
+    "workflow",
+    "framework",
+    "flowai"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "flowai-beta",
+    "shortDescription": "Opt-in beta capabilities not yet promoted to core. Ships the doc-anchors-validate Stop hook (SALP anchor/reference integrity check; Claude Code only) and the select-llm-model skill (task-driven LLM recommender; live-fetched leaderboard data).",
+    "developerName": "korchasa",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ]
+  },
+  "license": "MIT",
+  "hooks": "./hooks/hooks.json"
+}
