@@ -1,7 +1,7 @@
 {
   "name": "flowai-memex",
   "description": "Memex — long-term knowledge bank for AI agents. Skills that ingest sources, answer questions with citations, and audit the bank for orphans, dead links, and contradictions.",
-  "version": "0.13.11",
+  "version": "0.13.12",
   "author": {
     "name": "korchasa"
   },
