@@ -1,6 +1,6 @@
 {
   "name": "flowai-beta",
-  "version": "0.13.13",
+  "version": "0.13.14",
   "description": "Opt-in beta capabilities not yet promoted to core. Ships the doc-anchors-validate Stop hook (SALP anchor/reference integrity check; Claude Code only) and the select-llm-model skill (task-driven LLM recommender; live-fetched leaderboard data).",
   "author": {
     "name": "korchasa"

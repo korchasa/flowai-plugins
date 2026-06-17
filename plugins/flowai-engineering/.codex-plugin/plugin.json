@@ -1,6 +1,6 @@
 {
   "name": "flowai-engineering",
-  "version": "0.13.13",
+  "version": "0.13.14",
   "description": "Procedural engineering knowledge (deep-research, fix-tests, draw-diagrams, write-prd, etc.)",
   "author": {
     "name": "korchasa"
