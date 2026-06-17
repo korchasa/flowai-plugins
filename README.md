@@ -4,11 +4,13 @@ Generated Claude Code + Codex plugin marketplace for the [AssistFlow](https://gi
 
 **This repository is a generated mirror.** Every generated file on `main` is produced by CI in [`korchasa/flowai`](https://github.com/korchasa/flowai) on each `framework-v*` release. Do not edit generated files by hand; only `README.md` and `LICENSE` are maintained directly here.
 
+On Claude Code and Codex, installing from this marketplace is the **recommended** way to use flowai.
+
 ## Install in Claude Code
 
 ```shell
 /plugin marketplace add korchasa/flowai-plugins
-/plugin install flowai-core@flowai-plugins
+/plugin install flowai@flowai-plugins
 /reload-plugins
 ```
 
@@ -20,6 +22,7 @@ Optional packs:
 /plugin install flowai-engineering@flowai-plugins
 /plugin install flowai-devtools@flowai-plugins
 /plugin install flowai-memex@flowai-plugins
+/plugin install flowai-beta@flowai-plugins
 /reload-plugins
 ```
 
@@ -27,9 +30,21 @@ Optional packs:
 
 ```shell
 codex plugin marketplace add korchasa/flowai-plugins
+codex plugin add flowai@flowai-plugins
 ```
 
-Then open Codex `/plugins` and install `flowai-core` or any other pack you use.
+Optional packs:
+
+```shell
+codex plugin add flowai-deno@flowai-plugins
+codex plugin add flowai-typescript@flowai-plugins
+codex plugin add flowai-engineering@flowai-plugins
+codex plugin add flowai-devtools@flowai-plugins
+codex plugin add flowai-memex@flowai-plugins
+codex plugin add flowai-beta@flowai-plugins
+```
+
+Start a new Codex thread to load installed packs. You can also open Codex `/plugins` to manage them.
 
 Codex hook execution is feature-gated. Enable `[features].plugin_hooks = true` in Codex before relying on plugin hooks from packs that ship hooks.
 
@@ -37,14 +52,15 @@ Codex hook execution is feature-gated. Enable `[features].plugin_hooks = true` i
 
 The marketplace currently publishes all framework packs:
 
-- `flowai-core` — base commands and skills: commit, plan, review, init, update, maintenance, and related workflow primitives.
+- `flowai` — core base commands and skills: commit, plan, review, init, update, maintenance, and related workflow primitives.
+- `flowai-beta` — opt-in beta capabilities: the `select-llm-model` skill and the (Claude-Code-only) `doc-anchors-validate` Stop hook.
 - `flowai-deno` — Deno command, deployment, and project command setup skills.
 - `flowai-devtools` — skill, command, agent, rule, hook, and benchmark authoring tools.
 - `flowai-engineering` — engineering knowledge workflows: deep research, fixing tests, diagrams, product docs, prompts, and GitHub ticket work.
 - `flowai-memex` — long-term project memory skills: save sources, answer from memory, audit the bank.
 - `flowai-typescript` — TypeScript strict-mode and Deno code-style setup skills.
 
-Skills are invoked under the plugin namespace, e.g. `/flowai-core:commit`, `/flowai-core:plan`, `/flowai-core:review`, `/flowai-engineering:deep-research`, `/flowai-memex:memex-save`. The `flowai-` prefix is stripped from skill and command directory names during build to avoid `/flowai-core:flowai-commit`-style double prefixes.
+Skills are invoked under the plugin namespace: the core pack uses `/flowai:`, optional packs use `/flowai-<pack>:`, e.g. `/flowai:commit`, `/flowai:plan`, `/flowai:review`, `/flowai-engineering:deep-research`, `/flowai-memex:save`. The `flowai-` prefix is stripped from skill and command directory names during build to avoid `/flowai:flowai-commit`-style double prefixes.
 
 ## Generated Layout
 
@@ -58,7 +74,7 @@ Skills are invoked under the plugin namespace, e.g. `/flowai-core:commit`, `/flo
 
 ## CLI Compatibility
 
-The plugin marketplace is an alternative distribution channel to the [`flowai` CLI](https://github.com/korchasa/flowai-cli). Do not install the same pack into the same IDE and project through both channels; pick either plugins or `flowai sync`.
+On Claude Code and Codex, the plugin marketplace is the **recommended** way to install flowai (native install, per-IDE updates, no Deno toolchain required). The [`flowai` CLI](https://github.com/korchasa/flowai-cli) remains the channel for Cursor / OpenCode (which have no plugin marketplace) and a supported alternative on Claude Code / Codex. The two channels are mutually exclusive: do not install the same pack into the same IDE and project through both — pick either plugins or `flowai sync`.
 
 ## Security
 
