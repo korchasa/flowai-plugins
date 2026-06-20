@@ -1,9 +1,9 @@
 ---
 name: engineer-plugin-hooks
 description: >-
-  Build AI IDE plugin hook elements: shared policies plus Claude
+  Build AI-IDE plugin hook elements - shared policies plus Claude
   Code/Codex/OpenCode/Cursor adapters for lifecycle events, blocking, audit, and
-  context injection.
+  context injection. Use when adding or configuring plugin hooks.
 ---
 
 # Plugin Hook Engineer

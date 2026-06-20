@@ -1,10 +1,9 @@
 ---
 name: push
 description: >-
-  User-invoked safe git push. Sets upstream on first push only after user
-  confirmation; refuses --force; permits --force-with-lease only with explicit
-  per-push authorization; pauses before pushing to main/master when the remote
-  has diverged. Self-contained — execute the inlined steps directly.
+  User-invoked safe git push. Confirms before setting first-time upstream and
+  before pushing a diverged main/master, and refuses force pushes without
+  explicit authorization. Self-contained — execute the inlined steps directly.
 disable-model-invocation: true
 argument-hint: optional branch name (defaults to current branch)
 ---

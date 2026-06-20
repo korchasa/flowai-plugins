@@ -1,6 +1,9 @@
 ---
 name: commit
-description: 'Streamlined commit workflow — fewer tool calls, targeted doc sync'
+description: >-
+  Commit current changes as atomic, conventional commits with targeted
+  documentation sync — groups the diff into logical commits and updates the docs
+  each change affects.
 disable-model-invocation: true
 ---
 

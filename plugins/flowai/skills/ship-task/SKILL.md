@@ -2,10 +2,9 @@
 name: ship-task
 description: >-
   Continuation of the SDLC from a ready task file: implement → review → commit →
-  push. Four phases, three gates (green check, verdict, clean tree). No planning
-  — the task file must already exist with `## Solution` filled. Self-contained —
-  execute the inlined steps directly, do NOT invoke other skills via the Skill
-  tool.
+  push. No planning — the task file must already exist with `## Solution`
+  filled. Self-contained — execute the inlined steps directly, do NOT invoke
+  other skills via the Skill tool.
 disable-model-invocation: true
 argument-hint: path to a ready task file (or unambiguous task identifier)
 effort: high
