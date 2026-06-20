@@ -1,6 +1,6 @@
 {
   "name": "flowai",
-  "version": "0.13.16",
+  "version": "0.13.17",
   "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
   "author": {
     "name": "korchasa"
