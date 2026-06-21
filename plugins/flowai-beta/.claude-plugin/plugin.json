@@ -1,7 +1,7 @@
 {
   "name": "flowai-beta",
   "description": "Opt-in beta capabilities not yet promoted to core. Ships the doc-anchors-validate Stop hook (SALP anchor/reference integrity check; Claude Code only), the select-llm-model skill (task-driven LLM recommender; live-fetched leaderboard data), and cross-IDE delegation (ai-ide-runner one-shot relay / fan-out, delegate-to-ide + worker isolated-context subagent).",
-  "version": "0.13.17",
+  "version": "0.14.0",
   "author": {
     "name": "korchasa"
   },

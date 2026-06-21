@@ -1,6 +1,6 @@
 {
   "name": "flowai-devtools",
-  "version": "0.13.17",
+  "version": "0.14.0",
   "description": "Skill and agent authoring tools (engineer-skill, engineer-command, benchmarks, etc.)",
   "author": {
     "name": "korchasa"
