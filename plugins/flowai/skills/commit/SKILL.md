@@ -49,9 +49,9 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
    - **Breaking Changes**: MUST indicate breaking changes by adding a `!` before the colon (e.g., `feat!: change API contract`) OR by adding `BREAKING CHANGE:` in the footer.
    - **CRITICAL**: Commits without these prefixes are STRICTLY FORBIDDEN.
 5. **Git Pager**: Use `GIT_PAGER=cat` for all git commands.
-6. **Documentation First**: Every logical change MUST be reflected in documentation. Commits without corresponding documentation updates (if applicable) are forbidden.
+6. **Documentation First**: Every logical change MUST be reflected in the documentation the project has. Commits without corresponding documentation updates (if applicable) are forbidden. A document the project does not have yet is not a reason to stop — report it in one line under Documentation sync and commit; creating an SRS or SDS is `init`'s job, not this workflow's, and the "missing input" rule in AGENTS.md is about data the code consumes, not about documents.
 7. **Error Handling**: On any error (commit failure, merge conflict, unexpected git state): investigate the cause, propose a fix method to the user, and **STOP** without making corrections.
-8. **Session Scope**: If the working tree contains pre-existing uncommitted changes (files already modified/untracked at session start — visible in git status snapshot from system context), exclude them from the commit scope. Only commit files created or modified by the agent in the current session. If unsure which changes are yours, ask the user before staging.
+8. **Session Scope**: If the working tree contains pre-existing uncommitted changes (files already modified/untracked at session start — visible in git status snapshot from system context), exclude them from the commit scope. Only commit files created or modified by the agent in the current session. A change the user's request describes as theirs ("I added X in Y", "commit my changes") is in scope even when it predates the session — the request already answers the question this rule would ask. If still unsure which changes are yours, ask the user before staging.
 </rules>
 
 ## Instructions
@@ -66,6 +66,7 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
    - **Determine scope**: look at the file paths from step 1. Classify the change:
      - **Infra-only**: ALL changed files are tests (`*_test.*`, `*.test.*`), CI (`.github/`), acceptance tests (`acceptance-tests/`), formatting, or dev-environment (`.devcontainer/`). → Skip doc sync. Output: `Documentation sync: skipped — infra-only changes (tests/CI/acceptance-tests)`.
      - **Product changes**: anything else → proceed with doc sync below.
+   - **Resolve the documents first**: `SRS`, `SDS`, and `index` are ROLES, not filenames. Read `./AGENTS.md` and take the path each role is bound to — a project may put its SDS at `architecture/system.md` or its SRS at `specs/product.md`, and the mapping below then means those files. Never go looking for `design.md` / `requirements.md` by name, and never create a file at the conventional path when the role already points somewhere else: that leaves the real document stale and adds a second one nobody reads. **Take the WHOLE list the project declares, not just the three named roles** — a documentation hierarchy that also binds, say, an API reference or an operations runbook is naming documents this step must keep in sync, and a change belonging to one of them does not become the SDS's problem because the SDS is the familiar name. A role you cannot resolve → say so in one line and sync only what you can. The same holds for a role whose bound path does not exist on disk: output `Documentation sync: <role> → <path> is missing — not created`, then continue — nothing in this workflow creates a project document, and a missing document is not a missing input.
    - **Find the mapping**: check if `./AGENTS.md` has a `## Documentation Map` section. If yes → use the path→document mapping from there. If no → use the default mapping:
      - New/changed exported functions, classes, types → SDS (component section)
      - New feature, CLI command, skill, agent → SRS (new FR) + SDS (new component section)
@@ -73,7 +74,8 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
      - Changed behavior (fix that alters documented contract) → SDS (update description)
      - Renamed/moved modules → SDS (update paths and structure)
      - Config/build changes → SDS only if architecture section references them
-     - README.md → update only for user-facing changes (new install steps, new features, changed API)
+     - **Renamed or removed name that documents mention → EVERY document that still prints the old one.** A CLI flag, subcommand, option, environment variable, or exported symbol that changed its name is not covered by the "new feature" row, and this is the row that catches it. Do not infer the affected set from the kind of change: `grep` the OLD string across the resolved documents and README, and take the set from the hits. Searching for the NEW name instead returns nothing, which reads as "docs are fine" — that is how a rename passes this step with every document left stale.
+     - README.md → update only for user-facing changes (new install steps, new features, changed API). **A rename on the user-facing surface IS a changed API** — a CLI flag, subcommand, option, or environment variable that changed its name belongs here.
    - **Sync each affected document**:
      - For each changed file, identify which document section describes its component (using the mapping).
      - **READ** that specific section from the document.
@@ -81,6 +83,7 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
      - If inaccurate → update the section. If accurate → no change needed.
      - For **new** functionality with no corresponding section → add a new section.
      - For **removed** functionality → remove the section.
+     - **Renamed or removed identifiers — search by the OLD name, across every resolved document.** A flag, command, option, environment variable, function, or path that changed its name leaves the old one printed wherever it was documented, and grepping for the NEW name comes back empty, which reads as "docs are fine" and is how a rename passes this step untouched. Grep the old string verbatim in each resolved document plus README, and fix every hit. **One document updated is not the step finished**: the same name usually sits in several of them, and stopping at the first is the usual way the rest go stale.
    - **Gather change context** for commit message and doc updates:
      1. **Active task file**: If the user referenced a task file in this session, resolve `tasks` from AGENTS.md and read that file there. Do NOT scan all task files.
      2. **Session context**: User messages explaining intent, decisions, requirements.
@@ -101,28 +104,11 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
 4. **Commit Execution Loop**
    - **Iterate** through the planned groups:
      1. Stage specific files for the group.
-     2. Verify the staged content matches the group's intent.
+     2. Verify the staged content matches the group's intent — check WHICH files are staged with `git status --short`. When step 1 reused a diff from a prior phase rather than reading one, that is the whole check: staging moves files, it cannot change content you have already read, so do NOT run `git diff` in any form (`--cached`, `--stat`, per-file) to re-confirm it.
      3. **Task Status Lifecycle** (FR-DOC-TASK-LIFECYCLE) — for each staged task file under the resolved `tasks` role with `date:` frontmatter (skip legacy flat-path), first check frontmatter `status:`. If it is `superseded`, require/keep `superseded_by:` and skip DoD derivation because the stale original DoD no longer maps to current reality. Otherwise count top-level `- [ ]`/`- [x]` items in `## Definition of Done`. Derive `status`: `K=0→"to do"`, `0<K<N→"in progress"`, `K=N→"done"` (warn if no DoD). Rewrite frontmatter and `git add` if it differs. Idempotent. Never downgrade `done`. Warn-only on parse errors.
      4. Commit with a Conventional Commits message (including any task-status frontmatter edit).
-5. **Task file Cleanup** _(only if a task file was used in step 2)_
-   - **New-shape tasks** (task files under the resolved `tasks` role with `date:` frontmatter): NEVER delete — persistent canonical records. Status auto-flip in step 4.3 is the only lifecycle action for non-superseded tasks; `status: superseded` records are preserved.
-   - **Legacy tasks** (flat path, no `date:` frontmatter): if all DoD items satisfied → `git rm` and commit; if any unsatisfied → ask user "Delete or keep?"; if no DoD → ask user.
-6. **Session Complexity Check → Auto-Invoke Reflect**
-   - After all commits are done, analyze the current conversation for complexity signals:
-     - Errors or failed attempts occurred (test failures, lint errors, build errors).
-     - Agent retried the same action multiple times.
-     - User corrected the agent's approach or output.
-     - Workarounds or non-obvious solutions were applied.
-   - Also check the **user's invocation message** for explicit complexity descriptors: phrases like "rough session", "had to retry", "wrong approach", "failed", "had to correct you". These count as direct signals.
-   - If **any** of these signals are detected:
-     a. Announce briefly which signals fired (one line, e.g., "Detected retries and user correction — running /flowai:reflect").
-     b. **Pre-command signal check**: if the signals appear only in the invocation message (i.e., the problematic interactions predated this command and are not visible in the conversation history), output: "You mentioned a rough session — briefly describe what went wrong and what you corrected. This will be included as reflect context." Use the user's answer as additional context when invoking reflect.
-     c. Invoke the `reflect` skill directly (via the Skill tool, native slash-command execution, or inline execution of its `SKILL.md` instructions — whichever the host IDE supports).
-     d. Do NOT ask the user for confirmation before invoking; proceed autonomously (the context question in step b is not a confirmation request — it gathers missing information).
-   - If none detected, skip silently.
-7. **Post-Reflect Cleanup Commit** _(skip if reflect produced no edits)_
-   - Run `git status`. If reflect left working-tree edits (typically `AGENTS.md`, `**/CLAUDE.md`, `framework/**`, `.claude/**`, `documents/**`): stage them and commit as `agent: apply reflect-suggested improvements` (or narrower scope, e.g. `agent(commit): tighten doc-audit gate`). Do NOT amend earlier commits — keep reflect-driven edits as a separate commit. If `git status` is clean, skip.
-8. **Verify Clean State**
+5. **Task files are never deleted** _(only if a task file was used in step 2)_ — task files of ANY shape (new-shape `date:` frontmatter or legacy flat-path) are persistent canonical records; `commit` MUST NOT delete them, regardless of DoD completion. The only lifecycle action is the status derivation in step 4.3; `status: superseded` records are preserved.
+6. **Verify Clean State**
    - Run `git status` to confirm all changes are committed.
    - If uncommitted changes remain, investigate and report to the user.
 </step_by_step>
@@ -135,7 +121,5 @@ The project follows Conventional Commits 1.0.0 and uses a structured documentati
 - [ ] Changes grouped by logical purpose (no mixed independent concerns).
 - [ ] Commits executed automatically without user prompt.
 - [ ] Conventional Commits format used.
-- [ ] Task file cleanup: completed task files deleted, partial task files confirmed with user.
-- [ ] Session complexity check performed; `/flowai:reflect` auto-invoked if signals detected.
-- [ ] Post-reflect cleanup commit created when reflect left uncommitted edits to project instructions; otherwise skipped.
+- [ ] Task files preserved: no task file deleted (any shape); status derived from DoD (step 4.3) is the only lifecycle action.
 </verification>

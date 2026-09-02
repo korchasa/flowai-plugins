@@ -10,7 +10,7 @@ argument-hint: path to a ready task file (or unambiguous task identifier)
 effort: high
 ---
 
-<!-- GENERATED FROM framework/composites/ship-task.md, framework/atoms/implement.md, framework/atoms/review.md, framework/atoms/commit.md, framework/atoms/push.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
+<!-- GENERATED FROM framework/composites/ship-task.md, framework/atoms/implement.md, framework/atoms/review.md, framework/atoms/commit.md, framework/atoms/push.md, framework/atoms/reflect-gate.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
 
 # Task: Continue Ship from a Ready Task File — Implement, Review, Commit, Push
 
@@ -22,12 +22,14 @@ User-invoked command that picks up the SDLC cycle AFTER the planning phase: the 
 2. **Review Phase** — QA + lead-engineer review of the diff with a structured verdict.
 3. **Commit Phase** — targeted documentation sync + Conventional Commits + task-status auto-flip.
 4. **Push Phase** — safe `git push` with upstream and divergence gates.
+5. **Reflect Phase** — audit the session, criticise the findings, apply the corrective edits to the instruction files, show them, commit them, and ask whether to push that commit.
 
-Three explicit gates between phases:
+Four explicit gates between phases:
 
 - **Implement → Review** — project check MUST exit 0 AND `git status` MUST be non-empty.
 - **Review → Commit** — verdict MUST be Approve. Request Changes / Needs Discussion / crash → STOP.
-- **Commit → Push** — `git status` MUST be clean (all changes committed) AND if pushing main/master with remote-ahead, the Push Phase will ask before pushing.
+- **Commit → Push** — `git status --porcelain` MUST be empty, untracked files included, AND if pushing main/master with remote-ahead, the Push Phase will ask before pushing.
+- **Push → Reflect** — the push report does NOT end the run; the Reflect Phase follows in the same turn, whether the push succeeded or the user declined it. Reached only by a run that got this far: a STOP at an earlier gate ends the run and skips it.
 
 ## Context
 
@@ -40,11 +42,11 @@ ship-task is the SDLC continuation composite: by the time the agent exits, work 
 <rules>
 1. **No delegation**: All four phases are FULLY INLINED below. Execute the steps directly. Do NOT invoke any implement, review, commit, or push skill via the Skill tool — they would re-enter without the composite's gate logic and the workflow would silently exit between phases.
 2. **Task file is mandatory input**: The user MUST provide either a path to the task file or an unambiguous identifier resolvable through the `tasks` role in AGENTS.md. If neither is provided, ask once and STOP. If the resolved file does not exist or its `## Solution` section is empty, STOP with a clear message — this composite does not plan.
-3. **Four Phases, Strict Order**: Execute Implement fully, then Review, then Commit, then Push. Never interleave; never skip a gate.
+3. **Five Phases, Strict Order**: Execute Implement fully, then Review, then Commit, then Push, then Reflect. Never interleave; never skip a gate.
 4. **Implement → Review Gate**: project check MUST exit 0 AND `git status` MUST be non-empty. Otherwise STOP.
 5. **Verdict Gate**: only Approve proceeds to Commit. Request Changes / Needs Discussion / crash → STOP. Phase output is reported regardless.
-6. **Commit → Push Gate**: `git status` MUST be clean. Push Phase's safety contract handles upstream + divergence + force decisions.
-7. **No partial commit**: any earlier-phase failure (errors, crash, gate violation) STOPs the workflow.
+6. **Commit → Push → Reflect Gates**: `git status --porcelain` MUST be empty before the push — untracked files count, and Session Scope does not exempt them. Push Phase's safety contract handles upstream + divergence + force decisions. The push report is not the end of the run — the Reflect Phase follows it.
+7. **No partial commit — and a STOP ends the run**: any earlier-phase failure (errors, crash, gate violation) STOPs the workflow. **STOP means the run is over.** No later phase runs after it — the Reflect Phase included. A stopped run is not a finished run, so nothing downstream of the stop is owed: do not audit the session, do not edit instruction files, do not commit, do not push. Report which gate stopped you and why, then hand control back to the user and wait.
 8. **Transparency**: each phase reports its artefact (Implement test results, Review verdict, Commit SHAs, Push remote ref).
 9. **Planning**: use a task management tool (e.g. `todo_write`, `todowrite`, `Task`) to track all four phases as a single plan.
 10. **Session Scope**: for Review, Commit, and Push, exclude files already modified/untracked at session start (compare to git-status snapshot from system context). Files created during Implement Phase ARE in scope. If unsure, ask before staging.
@@ -100,219 +102,129 @@ ship-task is the SDLC continuation composite: by the time the agent exits, work 
 
 <step_by_step>
 
-1. **Empty Diff Guard** — `git diff --stat`, `git diff --cached --stat`,
-   `git status --short`. No changes → STOP. System gitStatus snapshot
-   can be stale (hooks / parallel processes); if live status shows
-   unauthored files clean per snapshot, ask user before staging.
+1. **Empty Diff Guard** — `git diff --stat`, `git diff --cached --stat`, `git status --short`. STOP only when ALL THREE are empty. A `??` entry in `git status --short` IS a change: two empty `git diff --stat` outputs plus one untracked file mean a non-empty review, so proceed. System gitStatus snapshot can be stale (hooks / parallel processes); if live status shows unauthored files clean per snapshot, ask user before staging.
 
 2. **Pre-flight Project Check**
-   - **Pick the check/test command**: AGENTS.md/CLAUDE.md declares it →
-     manifest detection (`deno.json` → `deno task check`/`test`;
-     `package.json` → `check`/`lint`/`test` script; `Makefile check` →
-     `make check`; `pyproject.toml` → `pytest`/`ruff check .`; `go.mod` →
-     `go vet ./... && go test ./...`) → else "No automated checks configured"
-     in the report and JiT subset disables (Rule 10). Do NOT guess.
-   - **MUST NOT** run a stack-specific command without its manifest. Any
-     `deno *` creates `deno.lock`; `npm *` resolves deps; etc. Pre-flight
-     artifacts (`deno.lock`, `__pycache__/`, `node_modules/`, `.pytest_cache/`)
-     in the tree after verification are a bug.
-   - **2a (current revision)**: run on working tree. Skip only if no code
-     files changed since the last successful check in this session. On
-     failure: report immediately as `[critical]` and continue review.
-   - **2b (parent baseline — JiT)**: identify parent (unstaged/staged →
-     `HEAD`; commit-range → `<range-start>^`). Prefer `git worktree add
+   - **Pick the check/test command**: AGENTS.md/CLAUDE.md declares it → manifest detection (`deno.json` → `deno task check`/`test`; `package.json` → `check`/`lint`/`test` script; `Makefile check` → `make check`; `pyproject.toml` → `pytest`/`ruff check .`; `go.mod` → `go vet ./... && go test ./...`) → else "No automated checks configured" in the report and JiT subset disables (Rule 10). Do NOT guess.
+   - **MUST NOT** run a stack-specific command without its manifest. Any `deno *` creates `deno.lock`; `npm *` resolves deps; etc. Pre-flight artifacts (`deno.lock`, `node_modules/`, `__pycache__/`) left after verification are a bug.
+   - **2a (current revision)**: run on working tree. Skip only if no code files changed since the last successful check in this session. On failure: report immediately as `[critical]` and continue review.
+   - **2b (parent baseline — JiT)**: identify parent (unstaged/staged → `HEAD`; commit-range → `<range-start>^`). Prefer `git worktree add
      <SCRATCH>/jit-parent-<sid> <parent-sha>` (full runnable tree); use
-     `git show <parent-sha>:<path>` fallback ONLY if worktree-add fails.
-     BEFORE any JiT synthesis, run the SAME project test/check command from
-     2a inside the parent worktree to verify baseline is green. Fallback
-     path OR red baseline → "JiT disabled — parent baseline unavailable/red"
-     in Degradation Notes; review continues without the JiT subset.
+     `git show <parent-sha>:<path>` fallback ONLY if worktree-add fails. BEFORE any JiT synthesis, run the SAME project test/check command from 2a inside the parent worktree to verify baseline is green. **Two things do NOT satisfy this and are the usual substitutes:** the run of that command you already did on the DIFF side (it says nothing about the parent), and running only your synthesized JiT probes against the parent (they are not the project's suite). The evidence this step wants is one invocation of the project's own command whose working directory is the parent tree. Fallback path OR red baseline → "JiT disabled — parent baseline unavailable/red" in Degradation Notes; review continues without the JiT subset.
 
 3. **Gather Context**
-   - **First**: resolve `SRS`, `SDS`, and `tasks` from AGENTS.md. If `SRS` or
-     `SDS` exists and its current content is not already in your context —
-     read the resolved file before proceeding. If a required role is missing,
-     report it and continue only for review steps that do not depend on that
-     role.
+   - **First**: resolve `SRS`, `SDS`, and `tasks` from AGENTS.md; read the resolved `SRS`/`SDS` files if their content is not already in context. A required role missing → report it and continue only with review steps that do not depend on that role. **AGENTS.md is the FIRST document you open, and no conventional location is probed before it.** The doc layout you have seen most often is one project's convention, not the shape of every project; a speculative `cat <guessed-path> 2>/dev/null` batched alongside the AGENTS.md read is still reading the wrong file first, and discarding its output afterwards does not undo that. Projects that keep their SRS and SDS somewhere else entirely exist, and they are exactly the ones this step is for.
    - Create a review plan in the task management tool.
-   - Collect the diff: `git diff` (unstaged), `git diff --cached` (staged),
-     or `git log --oneline <base>..HEAD` + `git diff <base>..HEAD` for
-     branch-based changes.
-   - **Untracked files**: `git diff` does NOT show untracked files. Check
-     `git status` output from step 1 — for each untracked file, read its
-     content directly and include it in the review scope.
-   - Read the original user request and the plan (task file under the
-     resolved `tasks` role / task list).
-   - Look for project conventions in config files (linter, formatter configs).
-     Rely on conventions visible in the diff and surrounding code.
-   - **3d (intent hints — JiT)**: collect intent-author hints for the JiT
-     subset: `git log -1 --pretty=%B <parent-sha>..HEAD` (or commit messages
-     of the range). Optionally `gh pr view --json body` IF the `gh` CLI is
-     available AND the branch has a PR. If `gh` is missing or errors, proceed
-     silently — PR body is a bonus.
-   - **3e (intent inference — JiT)**: derive a list of ≤5 explicit intents
-     for the diff in the form "the author tried to do X; invariants Y should
-     hold". Pull from (a) the task file's DoD items, (b) commit messages
-     from 3d, and (c) the diff hunks. If more than 5 candidates surface,
-     merge related intents or drop the least-risky. Skip this sub-step if
-     the JiT subset is disabled (Rule 10).
+   - Collect the diff: `git diff` (unstaged), `git diff --cached` (staged), or `git log --oneline <base>..HEAD` + `git diff <base>..HEAD` for branch-based changes.
+   - **Untracked files**: `git diff` does NOT show them — read each untracked file from step 1's `git status` and include it in scope.
+   - Read the original user request and the plan (task file under the resolved `tasks` role / task list).
+   - Note project conventions from linter/formatter configs and patterns visible in the diff and surrounding code.
+   - **3d (intent hints — JiT)**: collect intent-author hints for the JiT subset: `git log -1 --pretty=%B <parent-sha>..HEAD` (or commit messages of the range). Optionally `gh pr view --json body` IF `gh` is available AND the branch has a PR; on missing/error proceed silently — PR body is a bonus.
+   - **3e (intent inference — JiT)**: derive a list of ≤5 explicit intents for the diff in the form "the author tried to do X; invariants Y should hold". Pull from (a) the task file's DoD items, (b) commit messages from 3d, and (c) the diff hunks. >5 candidates → merge related or drop the least-risky. Skip if the JiT subset is disabled (Rule 10).
 
    **Parallel Delegation** (after gathering context):
-   - **Small diff shortcut**: If `git diff --stat` shows < 50 changed lines,
-     skip delegation — run all steps inline (overhead not justified).
-   - Otherwise, delegate **2 independent tasks in parallel** (via subagents,
-     background tasks, or IDE-specific parallel execution — e.g., `Task`,
-     `Agent`, `parallel`):
-     - **SA1**: If pre-flight check (step 2a) already ran, skip SA1. Otherwise,
-       run the project check command **chosen via the same manifest-detection
-       rule from step 2** (MUST NOT run stack-specific commands without the
-       corresponding manifest). Delegate to a console/shell-capable agent
-       (e.g., `console-expert`). Return pass/fail + full output.
-     - **SA2**: Run hygiene grep scan on diff output — search for `TODO`,
-       `FIXME`, `HACK`, `XXX`, `console.log`, `temp_*`, `*.tmp`, `*.bak`,
-       hardcoded secrets patterns. Delegate to a console/shell-capable agent.
-       Return findings list.
-   - **Fallback rule**: If any delegated task fails or times out, the main
-     agent performs that step inline. No hard dependency on delegation success.
-   - Continue with steps 4, 6, 7, 8 (main agent review) while delegated
-     tasks run.
+   - **Small diff shortcut**: skip delegation only when the change set is under 50 lines IN TOTAL — `git diff --stat` plus `git diff --cached --stat` plus `wc -l` over every untracked file from step 1. Count the lines before deciding; `git diff --stat` alone reports 0 for an untracked-only change set, and file COUNT is not the threshold (one 173-line file is a large diff, not a small one).
+   - Otherwise, delegate **2 independent tasks in parallel** to SEPARATE agent contexts — a subagent or a background task (e.g. `Task`, `Agent`, `task`), each returning its result to you. **Batching several tool calls in your own thread is NOT delegation**: the point is to keep the check output out of your context, which only a separate context achieves. **Establish availability by LOOKING, never by assuming**: list the project's agent directory (`ls .claude/agents/ .cursor/agents/ .opencode/agent/ 2>/dev/null`). A file there means that agent is installed and dispatchable — dispatch it by name. Running inside a sandbox, a test harness, or an automated run is NOT evidence of missing subagents and is never a reason to skip: decide from the listing, not from where you think you are. **Run the listing BEFORE any inline check, and quote its output in `### Degradation Notes` whenever you claim delegation was unavailable.** The claim is a factual report about this machine, and without the command's output behind it you are stating something you did not check: a review that ran the checks inline and wrote `Parallel delegation unavailable` on top of an installed agent directory reported a fact that was false. Inline is permitted only when the listing came back empty AND no subagent tool is in your toolset — both verified, not assumed. Do not silently call a batch of your own tool calls a delegation. **Speed is not one of the two conditions.** "Faster than spinning up a subagent", "the file is only 181 lines", "I have already read it" — none of these reopen the shortcut, which is decided once, by the line count in step 1, and not revisited per task. The point of delegation is to keep the check output out of YOUR context; doing the work yourself because it is quick spends exactly what the step exists to save. **And it is per task, not per review**: SA1 and SA2 are two dispatches, so delegating one and running the other inline is a partial degradation that must be recorded as such — it is not delegation performed.
+     - **SA1**: skip if pre-flight check (step 2a) already ran. Otherwise run the project check command **chosen via the same manifest-detection rule from step 2** (never stack-specific commands without the manifest). Delegate to a console/shell-capable agent (e.g., `console-expert`); return pass/fail + full output.
+     - **SA2**: hygiene grep scan on the diff — `TODO`, `FIXME`, `HACK`, `XXX`, `console.log`, `temp_*`, `*.tmp`, `*.bak`, hardcoded-secret patterns. Same delegation; return findings list.
+   - **Collect what you dispatched**: many subagent tools dispatch in the background by default and answer with a handle (an agent id plus token/duration counters) instead of the result. When your tool offers a foreground or blocking mode (a `run_in_background: false` parameter or equivalent), set it. If you still get back only a handle, continue that agent by its id — send it a message or resume it and ask for its result. Do NOT feed an agent id to a background-task polling tool: the two id kinds are different, and the poll answers `No task found with ID: <id>` however long you give it. Never write a delegated finding you did not actually receive. **And never end your turn while a dispatch is outstanding.** Sitting idle until a notification arrives is not waiting — the turn closes, the session ends there, and the review produces no verdict, no report and no findings at all: strictly worse than the inline run you were avoiding. Collecting is an action you take, not an event you receive.
+   - **Fallback rule**: a delegated task genuinely fails, or is still unfinished when you have exhausted the collection budget → the main agent performs that step inline and says so in `### Degradation Notes`. No hard dependency on delegation success.
+   - Continue with steps 4, 6, 7, 8 (main agent review) while delegated tasks run — then collect before writing the report.
 
 4. **QA: Task Completion**
    - Map each requirement/plan item to concrete changes in the diff.
    - Flag requirements with no corresponding changes as `[critical] Missing`.
-   - Flag plan items marked "done" but not present in diff as
-     `[critical] Phantom completion`.
+   - Flag plan items marked "done" but not present in diff as `[critical] Phantom completion`.
    - Check for regressions: do changed files break existing functionality?
+   - **Doc drift**: for each changed source path, read the docs that describe it (the Documentation Map in AGENTS.md when present, else the resolved `SRS` / `SDS` / `README`). A doc still describing behaviour the diff removed or changed → `[warning] Doc drift` naming the doc `file:line` and the contradicting hunk. Drift alone is NEVER `[critical]` and never blocks the verdict — the commit phase owns Documentation Sync, so escalating here would stop the workflow before the step that fixes it. Do NOT edit the doc in this review.
 
 4a. **FR Coverage Audit** _(blocking gate — see Requirements Lifecycle in AGENTS.md)_
+   - **Applicability first**: this gate encodes a project convention, not a universal rule. It applies ONLY when the project itself declares it — an `SRS` role resolves from AGENTS.md AND that AGENTS.md mandates FR traceability (acceptance references, `[REF:fr:<id>]` code markers). Neither present → skip 4a entirely, record `FR coverage gate not applicable — project declares no requirements lifecycle` in `### Degradation Notes`, and NEVER emit a `missing code marker` / `no acceptance reference` finding. Inventing the convention for a project that does not use it turns every clean diff into `Request Changes`.
    - **FRs in scope**: (a) FR-* in the task file's `implements:`; (b) FR sections added/modified in the diff to `SRS`; (c) `[REF:fr:<id>]` SALP markers touched in the diff.
    - **Per FR**: (1) SRS has `**Acceptance:**` with a runnable ref (test `path::name`, benchmark id, command, or `manual — <reviewer>`); missing/placeholder → `[critical] no acceptance reference`. (2) Run the evidence command (or `deno run -A scripts/check-fr-coverage.ts FR-<ID>`); non-zero / failing / `manual` without reviewer → `[critical] acceptance fails`. (3) FR claimed implemented but no `[REF:fr:<id>]` marker in changed source → `[critical] missing code marker`. (4) DoD `[x]` with no evidence run/cached pass → `[critical] Phantom completion`.
    - **Gate**: blocking — verdict cannot be `Approve` while any FR-gate issue remains.
 
+4b. **QA: Existing-Suite Execution** _(blocking gate — Rule 13)_
+   - **Locate** the repository's PRE-EXISTING test module(s) covering the changed symbols: grep the WHOLE repository — not just the directory the change lives in — for each changed symbol AND for its direct CALLERS (importers); transitive coverage often never names the changed symbol. Exclude test files added by this diff.
+   - **Do these three things before you decide what to run**, and say what each returned: (1) grep the whole repository for the changed symbol and for its importers; (2) read AGENTS.md for a section naming test suites kept outside the default check — contract, integration, e2e, acceptance — and how to run them; (3) open the test-runner config and read the check/test task's `exclude` list and any path it is scoped to. Each one can surface coverage the other two miss, and skipping the last two is how a suite that exists gets reported as absent.
+   - **The project's check or test command is NOT this search, and running it does not discharge this step.** Those commands encode what the project runs on every change; this gate asks what covers the symbols YOU changed, and the two differ by design. A suite the check command deliberately excludes — contract tests, integration tests, anything a config `exclude` or a scoped path argument skips — is precisely what this gate exists to reach: it was excluded for cost, not because it stopped being coverage. Before deciding what to run, read AGENTS.md for a section naming where such tests live and how to run them, and check the test-runner config for `exclude` entries and for scoped paths in the check task. If either points at a suite covering your changed symbols, run it. "The project check passed" is not an answer to this step; name the modules you located and the command you ran on each.
+   - **RUN** each located module, scoped per AGENTS.md conventions — never a full-suite run. Any failure → `[critical]`; verdict cannot be `Approve`. A pre-existing test that contradicts the diff is a finding under Rule 12, not a file to update.
+   - None found → record "no pre-existing coverage for the changed symbols".
+   - Module cannot run locally (live service, missing env) → record module + reason in `### Degradation Notes`; never fabricate a pass.
+   - Self-authored tests NEVER satisfy this gate, regardless of how many pass.
+
 5. **QA: Hygiene** _(use SA2 result if available; else inline)_
+   - **Say in the report that the scan ran, including when it found nothing.** A clean scan and a scan that never happened look identical on a page that only lists findings, so a hygiene line is required either way — findings, or `Hygiene: clean (N patterns scanned over the diff)`.
    - SA2 done → dedupe its findings with own Code Review findings and merge.
-   - SA2 failed/timed out or skipped (small diff) → perform inline:
-   - **Temp artifacts**: New `temp_*`, `*.tmp`, `*.bak`, debug `console.log`/
-     `print` statements, hardcoded secrets or localhost URLs.
-   - **Unfinished markers**: New `TODO`, `FIXME`, `HACK`, `XXX` introduced in
-     this diff (distinguish from pre-existing ones).
-   - **Dead code**: Commented-out blocks, unused imports/variables/functions
-     added in this diff.
-   - **Deleted directories**: If the diff deletes an entire skill, agent, or
-     module directory (not just individual files), flag as
-     `[warning] Entire directory deleted — confirm intentional` and ask the
-     user to verify before proceeding.
+   - SA2 failed/timed out or skipped (small diff) → scan inline:
+   - **Temp artifacts**: the SA2 pattern list from step 3, plus debug `print` output and hardcoded secrets or localhost URLs.
+   - **Unfinished markers**: new `TODO`/`FIXME`/`HACK`/`XXX` introduced in this diff (distinguish from pre-existing ones).
+   - **Dead code**: commented-out blocks, unused imports/variables/functions added in this diff.
+   - **Deleted directories**: diff deletes an entire skill/agent/module directory (not just files) → `[warning] Entire directory deleted — confirm intentional`; ask the user to verify before proceeding.
 
 6. **Code Review: Design & Architecture**
-   - **Responsibility**: Does each changed file/module stay within its stated
-     responsibility? Flag scope creep.
-   - **Coupling**: Are new dependencies (imports, API calls) justified?
-     Flag tight coupling or circular dependencies.
-   - **Abstraction**: Is the level of abstraction appropriate? Flag
-     over-engineering (unnecessary interfaces, premature generalization) and
-     under-engineering (god-functions, duplicated logic).
-   - **Risk hypotheses (JiT side-channel)**: while reading each hunk, also
-     accumulate ≤3 risk hypotheses per intent (from Step 3e) in the form
-     "if the author, while trying to do X, had slipped on Y, the code would
-     now fail at Z". Risks MUST be diff-specific — not generic code smells
-     ("null deref", "unhandled exception") unless the diff directly exposes
-     that risk. Skip this side-channel if the JiT subset is disabled.
+   - **Responsibility**: each changed file/module stays within its stated responsibility? Flag scope creep.
+   - **Coupling**: new dependencies (imports, API calls) justified? Flag tight coupling and circular dependencies.
+   - **Abstraction**: appropriate level? Flag over-engineering (unnecessary interfaces, premature generalization) and under-engineering (god-functions, duplicated logic).
+   - **Risk hypotheses (JiT side-channel)**: while reading each hunk, accumulate ≤3 risk hypotheses per intent (from Step 3e): "if the author, while doing X, had slipped on Y, the code would now fail at Z". Risks MUST be diff-specific — not generic code smells ("null deref") unless the diff directly exposes that risk. Skip if the JiT subset is disabled.
 
 7. **Code Review: Implementation Quality**
-   - **Naming**: Are new identifiers (vars, funcs, types) clear and consistent
-     with project conventions?
-   - **Error handling**: Are errors handled explicitly? Flag swallowed
-     exceptions, missing error paths, generic catch-all handlers.
-   - **Edge cases**: Are boundary conditions (null, empty, overflow, concurrent
-     access) handled?
-   - **Types & contracts**: Are type signatures precise? Flag `any`, untyped
-     parameters, missing return types (where project conventions require them).
-   - **Tests**: Do new/changed behaviors have corresponding tests? Are existing
-     tests updated for changed behavior?
-   - **Risk hypotheses (JiT side-channel)**: continue accumulating risks
-     started in Step 6 (see Step 8a for the mutation taxonomy).
+   - **Naming**: new identifiers clear and consistent with project conventions?
+   - **Error handling**: explicit? Flag swallowed exceptions, missing error paths, generic catch-all handlers.
+   - **Edge cases**: boundary conditions handled (null, empty, overflow, concurrent access)?
+   - **Types & contracts**: precise signatures? Flag `any`, untyped parameters, missing return types (where project conventions require).
+   - **Tests**: new/changed behaviors covered? Existing tests updated for changed behavior?
+   - **Risk hypotheses (JiT side-channel)**: continue accumulating risks started in Step 6 (see Step 8a for the mutation taxonomy).
 
 8. **Code Review: Readability & Style**
-   - **Consistency**: Do changes follow the project's established patterns
-     (file structure, naming, formatting)?
-   - **Comments**: Are non-obvious decisions explained? Flag misleading or
-     stale comments.
-   - **Complexity**: Flag functions > 40 lines or cyclomatic complexity spikes
-     introduced in this diff.
-   - **Clarity**: Flag clarity sacrificed for brevity — nested ternaries, dense
-     one-liners, overly compact expressions. Explicit code is preferred over
-     clever short forms.
+   - **Consistency**: changes follow the project's established patterns (file structure, naming, formatting)?
+   - **Comments**: non-obvious decisions explained? Flag misleading or stale comments.
+   - **Complexity**: flag functions > 40 lines or cyclomatic complexity spikes introduced in this diff.
+   - **Clarity**: flag clarity sacrificed for brevity — nested ternaries, dense one-liners, overly compact expressions. Explicit code is preferred over clever short forms.
 
 8a. **Mutant + Catching Test Synthesis (JiT)** _(skip on pure-deletion diff or JiT-disabled flag)_
-   - Generate ≤15 mutants total (≤5 intents × ≤3 risks × 1 mutant per risk),
-     each modelling a concrete diff-specific failure mode. Typical mutations:
-     comparator flip, removed guard, inverted return, off-by-one, swapped
-     args, skipped branch.
+   - Generate ≤15 mutants total (≤5 intents × ≤3 risks × 1 mutant per risk), each modelling a concrete diff-specific failure mode. Typical mutations: comparator flip, removed guard, inverted return, off-by-one, swapped args, skipped branch.
    - For each mutant, synthesize ONE ephemeral test that:
      1. Compiles / parses in the project's test language.
      2. Passes on the parent revision.
-     3. **Kills** the mutant (fails when the mutation is applied to the
-        diff-side code; passes on the current diff code if and only if the
-        current code preserves the parent behaviour).
-   - Write tests to the session-id'd scratch directory (Rule 11). Never
-     colocate next to the file under test in the main test tree.
+     3. **Kills** the mutant (fails with the mutation applied; passes on the current diff code iff it preserves the parent behaviour).
+   - Write tests to the session-id'd scratch directory (Rule 11). Never colocate next to the file under test in the main test tree.
 
 8b. **Dual-Run + Filter (JiT)** _(skip if Step 8a skipped)_
-   - **(a) parent**: run the generated tests against the parent worktree
-     from Step 2b. Any test that FAILS on the parent is an assumption leak —
-     discard it.
-   - **(b) diff**: run the surviving tests against the diff revision. Any
-     test that FAILS here is a **Catching JiTTest** — record it for the
-     final report with file:line and the assertion output.
-   - **(c) mutant kill-rate** _(optional)_: apply each mutant patch to the
-     diff tree, re-run the matching test, record whether the mutant is
-     killed. SKIP this sub-stage if a single invocation of the project's
-     test command on the smallest scope exceeds 30 s — explicitly write
-     `Mutant kill-rate skipped — single test invocation exceeded 30 s
-     threshold (recorded N s)` in Degradation Notes so the lost signal is
-     visible (not just an absent section).
+   - **(a) parent**: run the generated tests against the parent worktree from Step 2b. Any test that FAILS on the parent is an assumption leak — discard it.
+   - **(b) diff**: run the surviving tests against the diff revision. Any test that FAILS here is a **Catching JiTTest** — record it for the final report with file:line and the assertion output.
+   - **(c) mutant kill-rate** _(optional)_: apply each mutant patch to the diff tree, re-run the matching test, record whether the mutant is killed. SKIP if a single smallest-scope test invocation exceeds 30 s — write `Mutant kill-rate skipped — single test invocation exceeded 30 s threshold (recorded N s)` in Degradation Notes so the lost signal stays visible.
    - **Filter ensemble**, in order:
-     1. **Flaky** — rerun each surviving test 3 times; if the result flips,
-        discard.
-     2. **Assertion duplicates** — two tests asserting the same thing on the
-        same input.
+     1. **Flaky** — rerun each surviving test 3 times; if the result flips, discard.
+     2. **Assertion duplicates** — two tests asserting the same thing on the same input.
      3. **Zero-kill** — passed on parent, passed on diff, killed no mutant.
 
 9. **Run Automated Checks** _(collect from step 2 and/or SA1)_
    - Pre-flight 2a ran → use its result, do NOT re-run. SA1 broader check → merge.
-   - Neither ran (no check command) → note "No automated checks configured" in
-     the report; do not silently skip.
+   - Neither ran (no check command) → note "No automated checks configured" in the report; do not silently skip.
 
-10. **Final Report** — verdict on first line. Include JiT sections (`Intents`,
-   `Catching Tests`, `Uncovered Risks`, `Degradation Notes`) only when the
-   JiT subset ran (or was disabled — Degradation Notes then explains why).
-   Section order:
+10. **Final Report** — verdict on first line. Include JiT sections (`Intents`, `Catching Tests`, `Uncovered Risks`, `Degradation Notes`) only when the JiT subset ran (or was disabled — Degradation Notes then explains why). Section order:
 
    ```
-   ## Review: [Approve | Request Changes | Needs Discussion]
+   ## Review: [Approve | Request Changes | Needs Discussion]   <!-- count your [critical] findings BEFORE writing this line; zero criticals with no surviving catching test and no unsatisfied applicable gate => Approve -->
    ### Verdict (plain language) — 2–4 sentences a non-coder acts on: task complete? design sound? key risks? next step? Accept WITHOUT reading the diff. MUST come first.
    ### Intents (≤5)
    ### QA Findings — [severity] file:line — description
    ### Code Review Findings — [severity] file:line — description
    ### Catching Tests (pass on parent, fail on diff) — name, intent #, mutant killed?, failure, file:line
    ### Uncovered Risks — risk + reason no test (non-deterministic / I/O / etc.)
+   ### Existing-Suite Check — pre-existing modules (incl. caller tests) + run result, or why not run
    ### Automated Checks — [pass|fail|skipped] command — summary
    ### Degradation Notes — which JiT step was skipped and why
-   ### Summary — requirements X/Y; catching tests N; critical/warning/nit counts
+   ### Summary — requirements X/Y; catching tests N; hygiene scan result (findings or `clean`); critical/warning/nit counts
    ### Diff (optional) — offer diff/details for optional inspection; verdict stands without it; never block (Model B). MUST close the report.
    ```
 
-   ≥1 surviving catching test → verdict = `Request Changes` regardless of
-   other findings. Rank findings top-5 by `severity × uniqueness`. No issues
-   AND zero catching tests → "Changes look good. All requirements covered, no
-   issues found, no behavioural regressions detected." (last clause only when
-   JiT actually ran).
+   **After the verdict the review is over — including when the author asks you to fix what you found.** A reviewer who repairs the code then reports on their own work, and the finding that made the verdict disappears with the repair, so nobody can check it afterwards. Answer that the fix is the author's, or a separate implement/commit run, and leave the verdict where it stands. This holds for production files AND for pre-existing tests: when a pre-existing test contradicts the diff, the contradiction IS the finding, and editing either side deletes the evidence rather than resolving it. Continuing to run the project's checks or to explain a fix in words is fine; writing the fix is not.
 
-11. **Ephemeral Dispose (JiT)** _(skip when no catching tests exist)_ —
-   prompt: `save <name>` / `save all` / `discard all`. On `save`: propose
-   destination beside file-under-test, confirm, `git mv`, stage. On
-   `discard all` (default for timeout/ambiguous): delete entire scratch
-   directory, leave no stray files.
+   **Verdict selection** (decide in this order, first match wins): (1) `Request Changes` — ≥1 `[critical]` finding, ≥1 surviving catching test, or an APPLICABLE blocking gate (4a FR coverage where 4a applies at all, 4b existing-suite, Rule 13) still unsatisfied. (2) `Needs Discussion` — no blocker, but a design decision genuinely needs the human before merging. (3) `Approve` — everything else, and this branch is compulsory once reached. `[warning]` and `[nit]` findings NEVER force `Request Changes` on their own: list them, hand them to the author, approve. An `Approve` carrying warnings is the normal outcome, not a contradiction. Rank findings top-5 by `severity × uniqueness`. No issues AND zero catching tests → "Changes look good. All requirements covered, no issues found, no behavioural regressions detected." (last clause only when JiT actually ran).
+
+11. **Ephemeral Dispose (JiT)** _(skip ONLY when you created no scratch directory)_ — prompt: `save <name>` / `save all` / `discard all`. On `save`: propose destination beside file-under-test, confirm, `git mv`, stage. On `discard all` (default for timeout/ambiguous): delete entire scratch directory, leave no stray files. **A scratch directory you made is yours to remove, and the verdict is not the end of the run while one is still on disk.** This step goes missing in the same way every time: the report reads finished, the catching test has already done its job, and the leftover directory is invisible to you and permanent to everyone else — a run that names its scratch path in the report and then leaves it there has documented the mess rather than cleaned it. The prompt does not pause you: ask, and if no answer comes, discard and say you discarded. Removing the parent worktree is a different cleanup and does not cover this.
 
 </step_by_step>
 
@@ -331,10 +243,13 @@ After completing the Review report:
    - The diff and file list are already in context from the prior phase. Do NOT re-read them.
    - Run only `git status -s` to confirm nothing changed between phases.
    - If new changes appeared (unexpected), report and STOP.
+   - **`git diff` is banned for the rest of this phase — every form of it.** Not `git diff`, not `--cached`, not `--stat`, not a single file path, not "just to confirm what I staged" and not "to check the working tree matches the index". You have already read this content; `git add` moves files between index and working tree and cannot alter what is inside them, so a second read can only return what you already have, at the cost of the context this phase exists to save. `git status -s` answers every question you legitimately have here, because the only open question is WHICH files are staged.
+   - **The project's tests and check command are banned here too, for the same reason.** Verification belongs to the phase that already ran it, and this phase only ever adds comments, traceability markers and documentation — none of which can change what the code does. "I added a `[REF:...]` marker, so let me re-run the tests" re-pays the whole cost of the suite to re-confirm a verdict that is already in your context. If an edit in this phase COULD change behaviour, that edit does not belong in this phase.
 2. **Documentation Sync** _(mandatory — do NOT skip)_
    - **Determine scope**: look at the file paths from step 1. Classify the change:
      - **Infra-only**: ALL changed files are tests (`*_test.*`, `*.test.*`), CI (`.github/`), acceptance tests (`acceptance-tests/`), formatting, or dev-environment (`.devcontainer/`). → Skip doc sync. Output: `Documentation sync: skipped — infra-only changes (tests/CI/acceptance-tests)`.
      - **Product changes**: anything else → proceed with doc sync below.
+   - **Resolve the documents first**: `SRS`, `SDS`, and `index` are ROLES, not filenames. Read `./AGENTS.md` and take the path each role is bound to — a project may put its SDS at `architecture/system.md` or its SRS at `specs/product.md`, and the mapping below then means those files. Never go looking for `design.md` / `requirements.md` by name, and never create a file at the conventional path when the role already points somewhere else: that leaves the real document stale and adds a second one nobody reads. **Take the WHOLE list the project declares, not just the three named roles** — a documentation hierarchy that also binds, say, an API reference or an operations runbook is naming documents this step must keep in sync, and a change belonging to one of them does not become the SDS's problem because the SDS is the familiar name. A role you cannot resolve → say so in one line and sync only what you can. The same holds for a role whose bound path does not exist on disk: output `Documentation sync: <role> → <path> is missing — not created`, then continue — nothing in this workflow creates a project document, and a missing document is not a missing input.
    - **Find the mapping**: check if `./AGENTS.md` has a `## Documentation Map` section. If yes → use the path→document mapping from there. If no → use the default mapping:
      - New/changed exported functions, classes, types → SDS (component section)
      - New feature, CLI command, skill, agent → SRS (new FR) + SDS (new component section)
@@ -342,7 +257,8 @@ After completing the Review report:
      - Changed behavior (fix that alters documented contract) → SDS (update description)
      - Renamed/moved modules → SDS (update paths and structure)
      - Config/build changes → SDS only if architecture section references them
-     - README.md → update only for user-facing changes (new install steps, new features, changed API)
+     - **Renamed or removed name that documents mention → EVERY document that still prints the old one.** A CLI flag, subcommand, option, environment variable, or exported symbol that changed its name is not covered by the "new feature" row, and this is the row that catches it. Do not infer the affected set from the kind of change: `grep` the OLD string across the resolved documents and README, and take the set from the hits. Searching for the NEW name instead returns nothing, which reads as "docs are fine" — that is how a rename passes this step with every document left stale.
+     - README.md → update only for user-facing changes (new install steps, new features, changed API). **A rename on the user-facing surface IS a changed API** — a CLI flag, subcommand, option, or environment variable that changed its name belongs here.
    - **Sync each affected document**:
      - For each changed file, identify which document section describes its component (using the mapping).
      - **READ** that specific section from the document.
@@ -350,6 +266,7 @@ After completing the Review report:
      - If inaccurate → update the section. If accurate → no change needed.
      - For **new** functionality with no corresponding section → add a new section.
      - For **removed** functionality → remove the section.
+     - **Renamed or removed identifiers — search by the OLD name, across every resolved document.** A flag, command, option, environment variable, function, or path that changed its name leaves the old one printed wherever it was documented, and grepping for the NEW name comes back empty, which reads as "docs are fine" and is how a rename passes this step untouched. Grep the old string verbatim in each resolved document plus README, and fix every hit. **One document updated is not the step finished**: the same name usually sits in several of them, and stopping at the first is the usual way the rest go stale.
    - **Gather change context** for commit message and doc updates:
      1. **Active task file**: If the user referenced a task file in this session, resolve `tasks` from AGENTS.md and read that file there. Do NOT scan all task files.
      2. **Session context**: User messages explaining intent, decisions, requirements.
@@ -370,37 +287,21 @@ After completing the Review report:
 4. **Commit Execution Loop**
    - **Iterate** through the planned groups:
      1. Stage specific files for the group.
-     2. Verify the staged content matches the group's intent.
+     2. Verify the staged content matches the group's intent — check WHICH files are staged with `git status --short`. When step 1 reused a diff from a prior phase rather than reading one, that is the whole check: staging moves files, it cannot change content you have already read, so do NOT run `git diff` in any form (`--cached`, `--stat`, per-file) to re-confirm it.
      3. **Task Status Lifecycle** (FR-DOC-TASK-LIFECYCLE) — for each staged task file under the resolved `tasks` role with `date:` frontmatter (skip legacy flat-path), first check frontmatter `status:`. If it is `superseded`, require/keep `superseded_by:` and skip DoD derivation because the stale original DoD no longer maps to current reality. Otherwise count top-level `- [ ]`/`- [x]` items in `## Definition of Done`. Derive `status`: `K=0→"to do"`, `0<K<N→"in progress"`, `K=N→"done"` (warn if no DoD). Rewrite frontmatter and `git add` if it differs. Idempotent. Never downgrade `done`. Warn-only on parse errors.
      4. Commit with a Conventional Commits message (including any task-status frontmatter edit).
-5. **Task file Cleanup** _(only if a task file was used in step 2)_
-   - **New-shape tasks** (task files under the resolved `tasks` role with `date:` frontmatter): NEVER delete — persistent canonical records. Status auto-flip in step 4.3 is the only lifecycle action for non-superseded tasks; `status: superseded` records are preserved.
-   - **Legacy tasks** (flat path, no `date:` frontmatter): if all DoD items satisfied → `git rm` and commit; if any unsatisfied → ask user "Delete or keep?"; if no DoD → ask user.
-6. **Session Complexity Check → Auto-Invoke Reflect**
-   - After all commits are done, analyze the current conversation for complexity signals:
-     - Errors or failed attempts occurred (test failures, lint errors, build errors).
-     - Agent retried the same action multiple times.
-     - User corrected the agent's approach or output.
-     - Workarounds or non-obvious solutions were applied.
-   - Also check the **user's invocation message** for explicit complexity descriptors: phrases like "rough session", "had to retry", "wrong approach", "failed", "had to correct you". These count as direct signals.
-   - If **any** of these signals are detected:
-     a. Announce briefly which signals fired (one line, e.g., "Detected retries and user correction — running /flowai:reflect").
-     b. **Pre-command signal check**: if the signals appear only in the invocation message (i.e., the problematic interactions predated this command and are not visible in the conversation history), output: "You mentioned a rough session — briefly describe what went wrong and what you corrected. This will be included as reflect context." Use the user's answer as additional context when invoking reflect.
-     c. Invoke the `reflect` skill directly (via the Skill tool, native slash-command execution, or inline execution of its `SKILL.md` instructions — whichever the host IDE supports).
-     d. Do NOT ask the user for confirmation before invoking; proceed autonomously (the context question in step b is not a confirmation request — it gathers missing information).
-   - If none detected, skip silently.
-7. **Post-Reflect Cleanup Commit** _(skip if reflect produced no edits)_
-   - Run `git status`. If reflect left working-tree edits (typically `AGENTS.md`, `**/CLAUDE.md`, `framework/**`, `.claude/**`, `documents/**`): stage them and commit as `agent: apply reflect-suggested improvements` (or narrower scope, e.g. `agent(commit): tighten doc-audit gate`). Do NOT amend earlier commits — keep reflect-driven edits as a separate commit. If `git status` is clean, skip.
-8. **Verify Clean State**
+5. **Task files are never deleted** _(only if a task file was used in step 2)_ — task files of ANY shape (new-shape `date:` frontmatter or legacy flat-path) are persistent canonical records; `commit` MUST NOT delete them, regardless of DoD completion. The only lifecycle action is the status derivation in step 4.3; `status: superseded` records are preserved.
+6. **Verify Clean State**
    - Run `git status` to confirm all changes are committed.
    - If uncommitted changes remain, investigate and report to the user.
 </step_by_step>
 
 ### Commit → Push Gate
 
-- `git status` MUST be clean — every Implement-Phase change committed during the Commit Phase. If `git status` shows uncommitted edits, **STOP** and report which files remain dirty.
+- `git status --porcelain` MUST print NOTHING. Modified files, staged files and **untracked files all count** — an untracked leftover is not an "edit", and reading this gate as edits-only is how it gets passed. Any output → **STOP**, list the files, and do not push.
+- **Session Scope (rule 10) does NOT open this gate.** Scope decides what you may COMMIT; it says nothing about whether the tree is fit to push. A file that was already there at session start is correctly excluded from your commit AND still blocks the push — both hold at once, and "not mine to commit" is not a reason to push past it. Say which files you are stopping on and let the user decide.
 - If the current branch is `main` / `master` AND the remote is ahead, the Push Phase below will ask the user before pushing (per FR-ATOM-PUSH safety contract); do not pre-empt that gate here.
-- Otherwise → enter Push Phase. If the user explicitly declines the push at the Push Phase's first-push or divergence gate, **STOP** — the Commit Phase's commits remain locally and can be pushed manually later.
+- Otherwise → enter Push Phase. If the user explicitly declines the push at the Push Phase's first-push or divergence gate, **STOP** — the commits remain locally and can be pushed manually later.
 
 ### Push Phase
 
@@ -433,8 +334,10 @@ After completing the Review report:
 
 6. **Await CI** (FR-ATOM-PUSH.CI-AWAIT)
    - Read AGENTS.md `## CI/CD` section.
-     - **Absent**: output `No CI declared in AGENTS.md — skipping CI await.` and continue to step 7 (`7. **TOTAL STOP**
-   - Final report: target branch, upstream, pushed SHA, post-push verification result, CI await result (`skipped`, `green`, or `not reached — stopped earlier`).`).
+     - **Absent**: output `No CI declared in AGENTS.md — skipping CI await.` and continue to step 7 (`7. **Hand off to the next phase**
+   - Final report: target branch, upstream, pushed SHA, post-push verification result, CI await result (`skipped`, `green`, or `not reached — stopped earlier`).
+   - Announce: "Push complete; entering the next phase of the composite workflow."
+   - Do NOT issue a TOTAL STOP, and do NOT wait for the user to tell you to carry on. The push report reads like the end of the work — in `ship` and `ship-task` the Reflect Phase follows it, in this same turn.`).
      - **Malformed** (missing either `Provider:` or `Status command:`): STOP with `## CI/CD section is malformed — required keys: Provider, Status command. Found: <list of present keys>.` Do NOT silently fall back. Do NOT continue to step 7.
      - **Well-formed**: continue.
    - **Resolve tunables** (optional keys in `## CI/CD`):
@@ -461,9 +364,77 @@ After completing the Review report:
         `CI failed for commit $SHA on branch <CURRENT>. Run URL: <URL or "not available">. Failed-job logs (truncated to 12 KB):\n<LOGS or "not available">\nDiagnose the root cause. Do not apply a fix; report findings.`
      5. After `investigate` returns its report, STOP. Do NOT continue to step 7 — the push succeeded but the build is broken; the user owns the remediation decision.
 
-7. **7. **TOTAL STOP**
-   - Final report: target branch, upstream, pushed SHA, post-push verification result, CI await result (`skipped`, `green`, or `not reached — stopped earlier`).**
+7. **7. **Hand off to the next phase**
+   - Final report: target branch, upstream, pushed SHA, post-push verification result, CI await result (`skipped`, `green`, or `not reached — stopped earlier`).
+   - Announce: "Push complete; entering the next phase of the composite workflow."
+   - Do NOT issue a TOTAL STOP, and do NOT wait for the user to tell you to carry on. The push report reads like the end of the work — in `ship` and `ship-task` the Reflect Phase follows it, in this same turn.**
 
+</step_by_step>
+
+### Push → Reflect Gate
+
+- **You are only here if every earlier gate passed.** This gate is reached by completing the Push Phase, and by no other route. A STOP at any earlier gate ends the run on the spot (rule 7) and never arrives here, so nothing below applies to a stopped run.
+- The push report is not the end of the run. The Reflect Phase below still has to run, in this same turn, without waiting for the user to ask for it.
+- Enter the Reflect Phase whether the push succeeded or the user declined it. A declined push is still a completed run — the work is done and sitting in local commits — and the session is worth auditing either way, so the phase decides for itself whether it earned a reflection. A run stopped at an earlier gate is a different case entirely and does not reach this line.
+
+### Reflect Phase
+
+<step_by_step>
+1. **Decide whether this session earned a reflection**
+   - Scan the conversation and the invocation message for complexity signals:
+     - Errors or failed attempts (test failures, lint errors, build errors).
+     - The same action retried more than once.
+     - The user correcting your approach or output.
+     - Workarounds or non-obvious solutions.
+     - Explicit descriptors in the invocation message — "rough session", "had to retry", "wrong approach", "failed", "had to correct you". These count on their own.
+   - **Say the verdict aloud either way** — one line: `Session complexity: none detected — skipping reflection`, or `Detected retries and a user correction — reflecting`. A silent skip is indistinguishable from a forgotten step.
+   - No signals → skip to the final step. Signals → continue.
+   - Do NOT ask whether to reflect. That is not the user's call here; the one question in this atom comes at step 6, and it is about pushing.
+
+2. **Audit the session**
+   - **Execution flow**: where did the work go wrong, and what did it cost — failed commands, wrong assumptions, rework.
+   - **Logic patterns**: looping (retrying without changing strategy), blindness (ignoring a "file not found" or a linter error), stubbornness (forcing a solution that does not fit).
+   - **Technical decisions**: proportionality, conformance to existing project patterns, abstraction fit, explicit error handling, robustness, obvious inefficiency, input validation, dependency justification, and fallbacks nobody asked for.
+   - **Context gaps**: project docs never opened, related source never read, relevant skills or rules never consulted, verification skipped, ambiguities resolved by guessing instead of asking.
+   - **Context waste**: files read but never used, whole files read for one fragment, the same unchanged file read twice, verbose tool output that added noise.
+   - **Undocumented discoveries**: knowledge gained here that changes how the project is built, run, tested or deployed. Keep what generalises; discard the one-off.
+   - **Automation opportunities**: a repeated multi-step sequence (→ a skill), an undocumented convention (→ a rule), an invariant you checked by hand (→ a hook).
+
+3. **Criticise your own findings — before you touch a file**
+   - **Validity**: is each finding backed by something you can quote from this session, or is it inference? Drop or downgrade the inferred.
+   - **False positives**: reading a neighbouring file to learn the pattern is not wasted context; updating a test after a deliberate behaviour change is not test-fitting.
+   - **Proportionality**: a one-off annoyance does not earn a new rule. Simplify anything disproportionate.
+   - **Blind spots**: which whole categories did you not look at — security, performance, documentation?
+   - **Severity**: a pattern seen twice with different root causes is not recurring.
+   - Say what this pass changed and why. What survives it is what you are about to write into the user's files.
+
+4. **Apply the corrective edits**
+   - Edit the instruction files directly. Each edit states the rule and the reason it exists, in the voice of the file it lands in.
+   - **They land in the project's own tracked files, inside the repository working tree** — `AGENTS.md`, `**/CLAUDE.md`, and the rule or skill files those point at. Confirm it: the path you edited must appear under `git status`.
+   - **Your own memory store is not a corrective edit.** Writing the lesson into the agent's persistent memory (a `memory/` directory under your home, a personal notes file, anything outside the repository) feels like it captures the finding and does not: it is not versioned, it does not reach anyone else working here, and a fresh checkout has none of it. It is also how this step gets silently skipped — measured 2026-08-19, one run in three wrote to `memory/` and reported there was nothing to commit. Use it in addition if you like, never instead.
+   - One edit per surviving finding. A finding that produces no concrete edit is a report line, not a corrective action — say so and move on.
+   - Keep them small and local: tighten an existing rule where one exists, add a new one only where none does.
+
+5. **Show the edits and commit them — no question here**
+   - List what you changed, file by file: the path, the section, what the rule now says, and which finding it came from. The user must be able to judge the edit from this list without opening a diff.
+   - Then commit, in this same turn, without asking. The edits are already written; a commit of what is already on disk adds no risk the edit did not, and both are undone by one git command. Do not offer to commit, do not wait for encouragement.
+   - Run `git status`. Stage ONLY the files you edited in step 4, by explicit path — never `git add -A`, never `.`; a working tree you did not touch is not yours to commit.
+   - Commit with type `agent` and a scope naming what you tightened: `agent: apply reflect-suggested improvements`, or narrower, e.g. `agent(commit): tighten the doc-audit gate`. The type is `agent` because the change is to the agent's own instructions — never `docs:`, `chore:` or `feat:`, whatever the file extension says. Never amend an existing commit.
+   - **Do not skip this step by not editing.** If the audit produced findings and you applied none of them, say why in one line — silence here reads as a clean session, and it was not.
+
+6. **Ask whether to push it — and end your turn on the question**
+   - This commit sits on top of whatever the calling workflow already pushed, so it is local until somebody sends it. That is why the question exists: it is the one thing here that reaches beyond this machine.
+   - Ask, in one line, naming the branch: `Committed as <sha> on <branch>. Push it? Reply "yes" to push, or "no" to drop the commit and the edits with it.`
+   - **Write nothing after the question until the reply arrives.** A question followed in the same breath by "pushing now" is not a question, it is an announcement — the user never got to answer. **You may not answer it on the user's behalf**: no pre-authorization carries over to a push, whatever the calling workflow already did.
+   - On `yes`: run `git push` with no flags, then verify `git rev-parse @{u}` matches `HEAD` and say so. **Never `--force`, never `--force-with-lease`, never `--set-upstream`.** If the branch has no upstream, or the remote has commits you do not, do NOT improvise: report it and tell the user to run the project's push workflow, which owns those decisions.
+   - On `no`: the edits are not wanted. Undo the commit and the edits together — a declined improvement left sitting in the branch is the same unwanted change, one `git log` further away.
+     - **Check two things first, then it is one command.** (a) `git rev-parse HEAD` still equals the sha you reported — nothing landed on top of your commit. (b) `git status --porcelain` prints nothing — the tree carries no other work. Both hold by construction here: the earlier phases committed and pushed everything, and you committed your own edits in step 5.
+     - Both true → `git reset --hard HEAD~1`. That is the whole undo: the commit and the file contents go together, and there is nothing to restore by hand.
+     - Either check fails → **STOP and change nothing.** A `--hard` reset discards uncommitted work outright, and whatever made those checks fail is work you did not put there. Report what you found, leave your commit in place, and let the user decide.
+     - Then confirm with `git log -1` that your commit is gone, and say in one line what you removed.
+
+7. **TOTAL STOP**
+   - Report in one line whether the reflection ran, what it changed, under which commit, and whether that commit was pushed. Then stop.
 </step_by_step>
 
 ### Final Combined Report
@@ -485,7 +456,9 @@ Output a combined summary:
 [ ] Verdict gate enforced: only Approve proceeded to Commit.
 [ ] Documentation sync performed.
 [ ] Commits used Conventional Commits format; task status auto-flipped per FR-DOC-TASK-LIFECYCLE.
-[ ] Commit → Push gate enforced: working tree clean before Push Phase.
+[ ] Commit → Push gate enforced: `git status --porcelain` empty (untracked included) before the Push Phase.
+[ ] Push → Reflect gate enforced: the Reflect Phase ran after the push report, in the same turn.
+[ ] No phase ran after a STOP: if an earlier gate stopped the run, the Reflect Phase did NOT run and no instruction-file edit, commit or push happened after the stop.
 [ ] Push Phase: no `--force` used; `--force-with-lease` only with explicit per-push authorization; first-push gate satisfied; protected-branch divergence handled before push attempt.
 [ ] Post-push verification: `git rev-parse @{u}` matches `HEAD`.
 [ ] Implement / Review / Commit / Push results all reported to user.

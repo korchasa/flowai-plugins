@@ -1,7 +1,7 @@
 {
   "name": "flowai-engineering",
-  "version": "0.14.0",
-  "description": "Procedural engineering knowledge (deep-research, fix-tests, draw-diagrams, write-prd, etc.)",
+  "version": "0.14.1",
+  "description": "Procedural engineering knowledge (deep-research, draw-diagrams, write-prd, etc.)",
   "author": {
     "name": "korchasa"
   },
@@ -15,7 +15,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "flowai-engineering",
-    "shortDescription": "Procedural engineering knowledge (deep-research, fix-tests, draw-diagrams, write-prd, etc.)",
+    "shortDescription": "Procedural engineering knowledge (deep-research, draw-diagrams, write-prd, etc.)",
     "developerName": "korchasa",
     "category": "Productivity",
     "capabilities": [

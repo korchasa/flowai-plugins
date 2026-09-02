@@ -6,8 +6,8 @@ description: >-
   commit to minimize context usage by delegating detailed diff analysis.
 tools: 'Read, Grep, Glob, Bash'
 disallowedTools: 'Write, Edit'
-model: haiku
-effort: low
+model: sonnet
+effort: medium
 maxTurns: 5
 ---
 

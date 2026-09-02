@@ -4,7 +4,7 @@ description: >-
   Estimate total token usage and cost across conversation history, system
   prompts, and active rules. Use when the user asks how much context or how many
   tokens are in use, to audit context size, or to estimate session cost.
-model: haiku
+model: sonnet
 effort: low
 ---
 

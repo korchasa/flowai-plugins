@@ -5,8 +5,8 @@ description: >-
   upstream changes with previous project adaptations. Use when adapt or update
   detects updated agents that need project-specific adaptation.
 tools: Bash
-model: sonnet
-effort: medium
+model: opus
+effort: high
 maxTurns: 15
 ---
 

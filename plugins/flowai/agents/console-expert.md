@@ -6,7 +6,7 @@ description: >-
   modifying code.
 tools: 'Read, Grep, Glob, Bash'
 disallowedTools: 'Write, Edit'
-model: haiku
+model: sonnet
 effort: low
 maxTurns: 10
 ---

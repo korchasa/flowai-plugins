@@ -8,7 +8,7 @@ description: >-
   general research.
 tools: 'Read, Grep, Glob, Bash, WebFetch, WebSearch'
 disallowedTools: 'Write, Edit'
-model: sonnet
+model: opus
 effort: high
 maxTurns: 30
 ---

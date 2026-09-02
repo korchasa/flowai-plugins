@@ -8,8 +8,8 @@ description: >-
   `ai-ide-runner` instead).
 tools: Bash
 disallowedTools: 'Write, Edit, Read'
-model: sonnet
-effort: medium
+model: opus
+effort: high
 maxTurns: 12
 ---
 

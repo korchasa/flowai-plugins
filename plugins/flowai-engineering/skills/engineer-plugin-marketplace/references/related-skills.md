@@ -29,14 +29,12 @@ Prefer these existing skills instead of duplicating their procedures.
   — acceptance scenarios for skill, command, agent, and plugin behavior.
 - [browser-automation](../../browser-automation/SKILL.md) — browser-based install
   or marketplace UI verification.
-- [fix-tests](../../fix-tests/SKILL.md) — diagnosing and fixing failing validation
-  or smoke tests.
 - [deep-research](../../deep-research/SKILL.md) — broad host-doc or ecosystem
   research when official docs are incomplete.
 - [draw-mermaid-diagrams](../../draw-mermaid-diagrams/SKILL.md) — marketplace
   build, sync, install, and trust-flow diagrams.
-- [write-gods-tasks](../../write-gods-tasks/SKILL.md) — task breakdowns with
-  goal, context, constraints, definition of done, and evidence.
+- `write-gods-tasks` (core pack) — the accepted task format: goal, context,
+  constraints, definition of done, and evidence.
 
 ## Local Repository Examples
 

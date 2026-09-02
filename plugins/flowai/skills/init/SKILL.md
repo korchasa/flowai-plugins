@@ -25,7 +25,7 @@ The user wants to bootstrap an AI agent's understanding of the project. The agen
 
 **File Structure**: init produces a single `./AGENTS.md` file containing all sections:
 - Project rules, metadata, vision, architecture, key decisions
-- Documentation rules (SRS/SDS/GODS formats, compressed style, doc hierarchy)
+- Documentation rules (task format, readability floor, chat output style, doc hierarchy). The SRS and SDS structures are NOT in AGENTS.md — they live in the pack-level templates `assets/SRS.template.md` and `assets/SDS.template.md`, which step 9 reads
 - Development commands (standard interface, detected commands)
 - Planning rules, TDD flow, code documentation rules
 </context>
@@ -35,12 +35,12 @@ The user wants to bootstrap an AI agent's understanding of the project. The agen
 <rules>
 1. **No Hallucinations**: Only document tooling and architecture that is explicitly found in the codebase or provided by the user.
 2. **Standard Format**: Generated files must follow the provided templates in `assets/`.
-3. **Idempotency (Brownfield)**: If components already exist, show diffs and ask for per-file confirmation before applying changes.
+3. **Idempotency (Brownfield)**: If components already exist, show diffs and ask for per-file confirmation before applying changes, under the turn rule in constraint 8.
 4. **Greenfield/Brownfield Detection**: The agent determines project type autonomously by analyzing output of the analysis script (file count, stack, file tree, presence of config files). Do NOT rely on an `is_new` flag from any script.
 5. **Scripts are read-only**: Analysis scripts must NOT create, write, or modify any files. All file creation is the agent's responsibility.
 6. **No rule copying**: Do NOT copy rules to IDE-specific rules directories. Rule management is outside init scope.
 7. **Mandatory**: The agent MUST use a task management tool (e.g., todo write) to track the execution steps.
-8. **Per-File Diff Confirmation**: For existing files, always show the diff to the user and ask for confirmation before applying. Never silently overwrite.
+8. **Per-File Diff Confirmation**: For existing files, always show the diff to the user and ask for confirmation before applying. Never silently overwrite. **A diff is the proposed unified diff of that file, shown under the file's path** — a prose summary, a change list, an excerpt, or a grouped description of "what will change" is not a diff, and a bullet list covering several files is not one either. **Ask a separate yes/no per file; one grouped "May I apply these changes?" is not a per-file confirmation** and does not authorize any of the writes. The project's instruction file may prefer decision-level narration over diffs for ordinary work ("narrate upward, not in diffs"); that preference does not apply here — this step exists to let the user read the exact change to a file they own before it is replaced. **Asking ends the turn.** The write belongs to a LATER turn, after the user's answer has arrived. A question and the write it asks about cannot share a turn — that is not a confirmation, it is a narration of a decision already taken. "May I apply this?" followed by the edit tool in the same turn means the confirmation never happened.
 9. **Preserve User Content**: In brownfield, extract and preserve user's existing instructions. Templates are fallbacks for greenfield only.
 10. **Collapse, Don't Fragment**: In brownfield, if legacy `documents/AGENTS.md` or `scripts/AGENTS.md` exists, merge their unique content into the root `./AGENTS.md` and delete the originals after user confirmation.
 </rules>
@@ -53,9 +53,9 @@ The user wants to bootstrap an AI agent's understanding of the project. The agen
    - Use a task management tool (e.g., todo write) to create a plan based on these steps.
 
 2. **Analyze Project**
-   - Run the analysis script to detect stack, inventory components, and verify setup:
+   - Run the analysis script to detect stack, inventory components, and verify setup. The script ships INSIDE this skill's directory, next to this SKILL.md (`<skill-dir>/scripts/generate_agents.ts`, e.g. `.claude/skills/init/scripts/generate_agents.ts` or `.codex/skills/init/scripts/generate_agents.ts`) — it is NOT in the project's own `scripts/`. Run it from the project root by that path; a missing `scripts/generate_agents.ts` at the project root is the expected state, not a blocker:
      ```bash
-     deno run --allow-read scripts/generate_agents.ts .
+     deno run --allow-read <skill-dir>/scripts/generate_agents.ts .
      ```
    - Read the JSON output. It wraps in `{ "ok": bool, "result": {...} }`. The `result` field contains: project metadata (`is_new`, `stack`, `file_tree`, `readme_content`), component `inventory`, and `verification` checks.
    - **Decision Point** (agent judgment, NOT a script flag):
@@ -125,6 +125,7 @@ The user wants to bootstrap an AI agent's understanding of the project. The agen
 
    - **For Brownfield**:
      - `./AGENTS.md`: Use the template structure. Fill with data inferred from the project. Preserve user's custom PROJECT_RULES (content between `---` and the next `## ` heading). If legacy layout was collapsed in step 4, the merged content is already prepared — use it.
+     - **Write step 4's inferences into `## Architecture` and `## Key Decisions` by name.** An existing AGENTS.md whose sections are blank has nothing to preserve there — a blank section is the section you were asked to fill, not user content. Recording the same material in the SRS, the SDS or the init-context task file does not discharge this: those are different documents, and a reader of AGENTS.md never sees them.
 
    - **Output**: a single `./AGENTS.md` file.
      - If file does not exist: create it, report to user.
@@ -145,8 +146,8 @@ The user wants to bootstrap an AI agent's understanding of the project. The agen
 9. **Generate Documentation**
    - Resolve documentation roles from the generated `AGENTS.md`: `SRS`, `SDS`, `tasks`, and `index`. If a role is missing, add it to AGENTS.md before generating docs.
    - Generate core documentation files at the resolved role paths:
-     - `SRS`: Fill based on interview data (Greenfield) or inferred context (Brownfield). Skip if file exists and has more than 50 lines.
-     - `SDS`: Create initial structure. Skip if file exists and has more than 50 lines.
+     - `SRS`: Read the pack-level template at `assets/SRS.template.md` and use its section and field structure verbatim (`## 3. Functional Reqs` with per-FR `**Desc:**` / `**Scenario:**` / `**Acceptance:**` / `**Status:**` fields). Fill based on interview data (Greenfield) or inferred context (Brownfield). Skip if file exists and has more than 50 lines.
+     - `SDS`: Read the pack-level template at `assets/SDS.template.md` and create the initial structure from it (`## 3. Components` with per-component `**Purpose:**` / `**Interfaces:**` / `**Deps:**` fields). Skip if file exists and has more than 50 lines.
      - `tasks` directory:
        - For **Brownfield**: Create an init-context task using the role's layout with "Discovered Context" (file tree) and README summary.
        - For **Greenfield**: Directory will be created on first use by planning/answer skills. No need to initialize.
@@ -164,6 +165,7 @@ The user wants to bootstrap an AI agent's understanding of the project. The agen
      4. Only create helper scripts in a separate directory if the command logic is too complex for inline commands, and follow existing project conventions for script placement.
    - **Skip condition**: If standard commands already exist in the project's command runner and user chose "create missing" -> skip.
    - **Verify**: Run `check` command to ensure it works.
+   - **Record the commands in `./AGENTS.md`**: step 6 wrote the file before these commands existed, so its `### Detected Commands` and `### Command Scripts` sections are still empty. Fill them now: under `### Detected Commands`, one line per standard command (`check`, `test`, `dev`, `prod`) with the exact invocation the project's runner uses (e.g. `deno task check`, `make check`, `npm run check`); under `### Command Scripts`, one line per helper script the step created with its path and purpose, or a one-line note that all commands are inline in the runner config. An empty section here is a missing step, not a placeholder to leave for later.
 
 11. **Devcontainer Setup (Optional)**
    - **For Greenfield**: Check `use_devcontainer` from interview data.
@@ -173,12 +175,12 @@ The user wants to bootstrap an AI agent's understanding of the project. The agen
 
 12. **Cleanup & Verify**
     - Remove temporary files: `project_info.json`, `interview_data.json` (if created).
-    - Re-run the analysis script to verify all components are in place:
+    - Re-run the analysis script (same skill-directory path as in step 2) to verify all components are in place:
       ```bash
-      deno run --allow-read scripts/generate_agents.ts .
+      deno run --allow-read <skill-dir>/scripts/generate_agents.ts .
       ```
     - Check the `verification` section. If `passed` is false (exit code 1), fix the issues before proceeding.
-    - Additionally verify: development commands are configured and the `check` command runs successfully.
+    - Additionally verify: development commands are configured, the `check` command runs successfully, and `./AGENTS.md` lists those commands under `### Detected Commands` (step 10).
     - **Verify single file**: Confirm that only `./AGENTS.md` exists and no legacy `documents/AGENTS.md` or `scripts/AGENTS.md` remain.
 
 </step_by_step>
@@ -196,7 +198,7 @@ The user wants to bootstrap an AI agent's understanding of the project. The agen
 [ ] `CLAUDE.md` symlink created at project root.
 [ ] No legacy sub-directory AGENTS.md or CLAUDE.md files remain.
 [ ] `documents/` folder populated with generated content from actual project data.
-[ ] Development commands configured (scripts created + config updated).
+[ ] Development commands configured (scripts created + config updated + recorded in `./AGENTS.md`).
 [ ] OpenCode compatibility checked (if applicable) via `inventory` output.
 [ ] Analysis script re-run passes (exit code 0, `verification.passed: true`).
 [ ] Check command runs successfully.

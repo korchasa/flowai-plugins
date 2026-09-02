@@ -9,8 +9,8 @@ description: >-
   calibration, or the interactive Resolution loop (those are parent-only).
 tools: 'Read, Grep, Glob, Bash'
 disallowedTools: 'Write, Edit'
-model: sonnet
-effort: medium
+model: opus
+effort: high
 maxTurns: 20
 ---
 

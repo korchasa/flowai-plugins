@@ -5,8 +5,8 @@ description: >-
   upstream changes with previous project adaptations. Use when update detects
   updated skills that need project-specific adaptation.
 tools: Bash
-model: sonnet
-effort: medium
+model: opus
+effort: high
 maxTurns: 15
 ---
 

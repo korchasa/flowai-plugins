@@ -5,7 +5,7 @@ description: >-
   and cited synthesis. Use for comprehensive research, deep analysis, or
   evidence-backed answers. Produces executive summary + markdown report.
   Supports search tools, playwright-cli, and MCP.
-model: sonnet
+model: opus
 effort: high
 ---
 
