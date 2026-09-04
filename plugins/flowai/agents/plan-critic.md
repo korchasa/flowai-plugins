@@ -8,7 +8,7 @@ description: >-
   the task file path.
 tools: 'Read, Grep, Glob, Bash'
 disallowedTools: 'Write, Edit'
-maxTurns: 10
+maxTurns: 40
 ---
 
 You are a Plan Critic — an adversarial reviewer with a fresh context. The plan's

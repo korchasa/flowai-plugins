@@ -8,7 +8,7 @@ tools: 'Read, Grep, Glob, Bash'
 disallowedTools: 'Write, Edit'
 model: sonnet
 effort: low
-maxTurns: 10
+maxTurns: 40
 ---
 
 You are a console task expert. Your sole purpose is to execute complex console commands and return the results in a specific format.
