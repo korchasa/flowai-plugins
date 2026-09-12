@@ -2,9 +2,9 @@
 name: implement
 description: >-
   Use when the user asks to execute an existing task plan's Solution under TDD —
-  RED → GREEN → REFACTOR → CHECK per AGENTS.md. Requires a written plan resolved
-  through the `tasks` role in AGENTS.md. Do NOT trigger on planning, reviewing
-  committed changes, or fixing pre-existing failing tests outside a plan.
+  RED → GREEN → REFACTOR → CHECK per AGENTS.md. Requires a written plan under
+  the `tasks` role. Do NOT trigger on planning, review, or unrelated failing
+  tests.
 ---
 
 <!-- GENERATED FROM framework/atoms/implement.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->

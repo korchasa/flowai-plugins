@@ -2,9 +2,8 @@
 name: deploy
 description: >-
   Manage Deno Deploy cloud services using both `deno deploy` and `deployctl`.
-  Use this skill for deploying projects, managing cloud environments
-  (Build/Dev/Prod contexts), monitoring logs, and troubleshooting deployment
-  issues (like private npm dependencies).
+  Use this skill for deploying projects, managing Build/Dev/Prod environments,
+  monitoring logs, and troubleshooting issues like private npm dependencies.
 ---
 
 # Deno Deploy
