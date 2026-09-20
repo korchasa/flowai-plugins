@@ -118,6 +118,7 @@ Follow plain language (ISO 24495-1) and the W3C COGA note "Making Content Usable
 (https://www.w3.org/TR/coga-usable/). Use structure — lists, tables, Mermaid diagrams —
 wherever it carries meaning better than prose does.
 
+- **The reader did not see this session.** Whoever reads a chat reply has not seen the screen, the code or the documents the agent worked with, and does not remember an earlier conversation. For every name in the reply (an identifier from code, a button label, a mode name, a term from documentation, a word the agent coined earlier in the session) say what the thing does or why it matters to the reader, in plain words of your own. Keep the name itself once, in backticks or parentheses, only when the reader needs it to find something. Name the options of a question by their meaning, not by the label on the screen. Precision comes from describing the action, not from the name.
 - Keep sentences under 25 words. Split a sentence that carries two different ideas.
 - Conclusion first: the result opens the paragraph, the reasoning follows.
 - A failure report states what happened and what to do next.
