@@ -1,10 +1,9 @@
 ---
 name: commit
 description: >-
-  Commit current changes as atomic, conventional commits with targeted
-  documentation sync — groups the diff into logical commits and updates the docs
-  each change affects.
-disable-model-invocation: true
+  Use when the user asks to commit the current changes — groups the diff into
+  atomic conventional commits and updates the docs each change affects. Not for
+  reviewing a diff, and not when the user asks for a review before the commit.
 ---
 
 <!-- GENERATED FROM framework/atoms/commit.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
