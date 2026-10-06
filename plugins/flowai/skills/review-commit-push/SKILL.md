@@ -323,9 +323,9 @@ After completing the Review report:
    - **Investigate Handoff** (CI red):
      1. If the `Logs command` is defined in AGENTS.md, execute it. Capture stdout. Truncate to 12 KB (`investigate` can fetch more via the run URL if it needs to drill deeper).
      2. If the `Run URL command` is defined, execute it. Capture stdout as the run URL.
-     3. The worktree is already clean (step 5 verified `@{u} == HEAD`), so `investigate`'s "Clean Baseline" precondition holds.
+     3. Do NOT assume the working tree is clean: `@{u} == HEAD` (step 5) proves only that the commit reached the remote, and a push leaves uncommitted work in place. The investigation therefore runs in a temporary worktree of the pushed commit, which is clean by construction; the handoff prompt below says so. Do NOT stash, reset, restore or commit the developer's uncommitted files to make the tree clean.
      4. Invoke the `investigate` skill via the host IDE's skill-invocation primitive (Skill tool / `/flowai:investigate` slash command / inline expansion of its `SKILL.md`) with this prompt:
-        `CI failed for commit $SHA on branch <CURRENT>. Run URL: <URL or "not available">. Failed-job logs (truncated to 12 KB):\n<LOGS or "not available">\nDiagnose the root cause. Do not apply a fix; report findings.`
+        `CI failed for commit $SHA on branch <CURRENT>. Run URL: <URL or "not available">. Failed-job logs (truncated to 12 KB):\n<LOGS or "not available">\nDiagnose the root cause in a temporary git worktree of $SHA (git worktree add <scratch dir> $SHA), not in the current working tree, and remove that worktree when done. Do not apply a fix; report findings.`
      5. After `investigate` returns its report, STOP. Do NOT continue to step 7 — the push succeeded but the build is broken; the user owns the remediation decision.
 
 7. **7. **Hand off to the next phase**
