@@ -1,10 +1,10 @@
 ---
 name: ship
 description: >-
-  Terminal full-cycle workflow: plan → implement → review → commit → push.
+  Use when the user asks to take a new task all the way: plan, implement,
+  review, commit and push. Not when a ready task file already exists.
   Self-contained — execute the inlined steps directly, do NOT invoke other
   skills via the Skill tool.
-disable-model-invocation: true
 argument-hint: task description or issue URL
 effort: high
 ---

@@ -1,9 +1,9 @@
 ---
 name: adapt
 description: >-
-  Adapt project-local flowai primitives (skills, agents, AGENTS.md artifacts,
-  hooks) to project specifics. Standalone adaptation — independent of update.
-disable-model-invocation: true
+  Use when the user asks to tailor the installed flowai skills, agents, hooks or
+  AGENTS.md artifacts to this project's specifics. Not for first-time setup,
+  template reconciliation, or edits to the project's own code.
 argument-hint: '[--skills|--agents|--hooks|--assets] [name]'
 ---
 

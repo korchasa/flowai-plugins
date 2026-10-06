@@ -1,9 +1,9 @@
 ---
 name: update
 description: >-
-  Reconcile project-owned AGENTS.md, CLAUDE.md, and scaffolded artifacts with
-  the current flowai framework templates.
-disable-model-invocation: true
+  Use when the user asks to reconcile the project's AGENTS.md, CLAUDE.md and
+  scaffolded files with the current flowai templates after a framework upgrade.
+  Not for first-time setup, and not for tailoring the installed skills.
 argument-hint: '[--instructions|--scaffolds|--all]'
 ---
 

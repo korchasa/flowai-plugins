@@ -1,9 +1,9 @@
 ---
 name: init
 description: >-
-  Initialize project with AGENTS.md and rules, handling both Greenfield (new)
-  and Brownfield (existing) projects.
-disable-model-invocation: true
+  Use when the user asks to set a project up for flowai for the first time —
+  writes AGENTS.md and the documentation skeleton for a new or an existing
+  codebase. Not for reconciling an existing AGENTS.md with newer templates.
 ---
 
 # Task: Initialize Project Agent Documentation

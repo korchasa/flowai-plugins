@@ -1,11 +1,10 @@
 ---
 name: review-commit-push
 description: >-
-  Close out finished uncommitted work in one run: review → commit → push →
-  reflect. No planning, no implementation — the diff must already exist.
-  Self-contained — execute the inlined steps directly, do NOT invoke other
-  skills via the Skill tool.
-disable-model-invocation: true
+  Use when the user asks to review finished uncommitted work, commit it and push
+  it in one run. Not for planning or implementing, nor when the user stops
+  before the push. Self-contained — execute the inlined steps directly, do NOT
+  invoke other skills.
 effort: high
 ---
 

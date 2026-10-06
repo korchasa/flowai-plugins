@@ -1,11 +1,10 @@
 ---
 name: ship-task
 description: >-
-  Continuation of the SDLC from a ready task file: implement → review → commit →
-  push. No planning — the task file must already exist with `## Solution`
-  filled. Self-contained — execute the inlined steps directly, do NOT invoke
+  Use when the user asks to implement a ready task file (its Solution filled),
+  then review, commit and push it. No planning; not for work that stops before
+  the commit. Self-contained — execute the inlined steps directly, do NOT invoke
   other skills.
-disable-model-invocation: true
 argument-hint: path to a ready task file (or unambiguous task identifier)
 effort: high
 ---
