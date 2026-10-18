@@ -1,6 +1,6 @@
 {
   "name": "flowai-deno",
-  "version": "0.14.41",
+  "version": "0.14.42",
   "description": "Deno-specific skills (CLI, deploy, configure commands)",
   "author": {
     "name": "korchasa"
