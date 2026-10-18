@@ -1,6 +1,6 @@
 {
   "name": "flowai",
-  "version": "0.14.31",
+  "version": "0.14.32",
   "description": "Base commands and skills for development workflows (commit, plan, review, init, etc.)",
   "author": {
     "name": "korchasa"
@@ -23,5 +23,6 @@
       "Write"
     ]
   },
-  "license": "MIT"
+  "license": "MIT",
+  "hooks": "./hooks/hooks.json"
 }
