@@ -5,34 +5,10 @@
   },
   "plugins": [
     {
-      "name": "flowai-beta",
-      "source": {
-        "source": "local",
-        "path": "./plugins/flowai-beta"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "flowai",
       "source": {
         "source": "local",
         "path": "./plugins/flowai"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "flowai-deno",
-      "source": {
-        "source": "local",
-        "path": "./plugins/flowai-deno"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -57,30 +33,6 @@
       "source": {
         "source": "local",
         "path": "./plugins/flowai-engineering"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "flowai-memex",
-      "source": {
-        "source": "local",
-        "path": "./plugins/flowai-memex"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
-      "name": "flowai-typescript",
-      "source": {
-        "source": "local",
-        "path": "./plugins/flowai-typescript"
       },
       "policy": {
         "installation": "AVAILABLE",
