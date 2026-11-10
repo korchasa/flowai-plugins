@@ -1,0 +1,27 @@
+{
+  "name": "flowai-swarm",
+  "version": "0.15.1",
+  "description": "One manager session and its child sessions on task files (start-child, children-status, close-swarm, session-status). Starting, messaging and archiving children need a host with session control.",
+  "author": {
+    "name": "korchasa"
+  },
+  "repository": "https://github.com/korchasa/flowai",
+  "keywords": [
+    "ai",
+    "workflow",
+    "framework",
+    "flowai"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "flowai-swarm",
+    "shortDescription": "One manager session and its child sessions on task files (start-child, children-status, close-swarm, session-status). Starting, messaging and archiving children need a host with session control.",
+    "developerName": "korchasa",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ]
+  },
+  "license": "MIT"
+}
