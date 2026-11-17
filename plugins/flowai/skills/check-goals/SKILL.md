@@ -3,8 +3,8 @@ name: check-goals
 description: >-
   Use when the user asks whether the goals of the CURRENT session are met —
   lists everything they asked for, gathers evidence for each item and reports
-  met or not met, changing nothing. Not for auditing how the session went — use
-  reflect.
+  met or not met, changing nothing. Not for auditing how the session went —
+  finish-session does.
 ---
 
 <!-- GENERATED FROM framework/atoms/check-goals.md via scripts/generate-skill-composites.ts — DO NOT EDIT BY HAND -->
@@ -25,7 +25,7 @@ and so is a ticked box in a task file. This skill replaces the claim with a
 check: it restates each goal in the user's words, looks at the project as it
 is now, and says which goals hold. It answers WHAT was delivered. HOW the
 session went — mistakes, wasted context, rules to tighten — is a different
-question and belongs to the reflection skills.
+question and belongs to the reflect phase of the workflows that close a session.
 </context>
 
 ## Rules & Constraints
